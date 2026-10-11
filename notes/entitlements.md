@@ -25,6 +25,8 @@ Steps:
 4. Give the device and app descriptions above.
 5. Submit. Apple attaches the granted group to the team. There is no published review time.
 
+Submitted 2026-10-11. Request ID `2QS5JLG4LR`. Boxes ticked: USB Transport and HID. Vendor ID 8406. The description stated that the vendor ID belongs to PowerA and linked https://github.com/leetrout/macgip. Apple's reply: "We'll review your request and contact you soon with a status update." 
+
 After approval:
 
 1. Certificates, Identifiers & Profiles > Identifiers: register an App ID for the driver (the dext bundle ID) and one for the host app.
