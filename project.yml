@@ -79,7 +79,8 @@ targets:
           # Interface level: the GIP control interface becomes a HID gamepad.
           macgipGamepad:
             CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
-            CFBundleIdentifierKernel: com.apple.kpi.iokit
+            # AppleUserHIDDevice lives in IOHIDFamily. Apple's AppleUserHIDDrivers.dext names it this way.
+            CFBundleIdentifierKernel: com.apple.iokit.IOHIDFamily
             IOClass: AppleUserHIDDevice
             IOUserClass: MacgipGamepad
             IOProviderClass: IOUSBHostInterface
