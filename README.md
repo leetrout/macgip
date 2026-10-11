@@ -22,7 +22,7 @@ Status 2026-10-11: Phase 2 of `notes/` is done. The pad speaks GIP, nothing in m
 ## Layout
 
 ```
-notes/            findings: environment.md, device.md, protocol.md, disconnect.md, architecture.md,
+notes/            findings: environment.md, device.md, protocol.md, disconnect.md, architecture.md, entitlements.md,
                   and handoff-2026-10-11.md (the original brief)
 notes/captures/   raw descriptors, probe logs, test results
 tools/            small programs used during investigation
