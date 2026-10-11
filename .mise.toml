@@ -2,6 +2,7 @@
 dprint = "latest"
 prek = "latest"
 gitleaks = "latest"
+xcodegen = "latest"
 
 [env]
 PKG_CONFIG_PATH = "/opt/homebrew/lib/pkgconfig"
@@ -26,6 +27,14 @@ mkdir -p build
 clang -std=c11 -Wall -Wextra -Werror -O1 -o build/test_gip gip/gip.c gip/test_gip.c
 build/test_gip notes/captures/2026-10-11-probe-run*.txt
 """
+[tasks.xcodeproj]
+description = "Generate macgip.xcodeproj from project.yml"
+run = "xcodegen generate --quiet"
+
+[tasks.build-driver]
+description = "Build the host app and the driver extension (Debug)"
+depends = ["xcodeproj"]
+run = "xcodebuild -project macgip.xcodeproj -scheme macgip -configuration Debug -derivedDataPath build/DerivedData -allowProvisioningUpdates build | tail -20"
 
 [tasks.hooks]
 description = "Install the git hooks with prek"

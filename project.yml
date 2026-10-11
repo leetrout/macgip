@@ -1,0 +1,118 @@
+# XcodeGen spec. Regenerate the Xcode project with `mise run xcodeproj`.
+name: macgip
+options:
+  bundleIdPrefix: com.leetrout
+  deploymentTarget:
+    macOS: "15.0"
+  generateEmptyDirectories: false
+  groupSortPosition: top
+settings:
+  base:
+    DEVELOPMENT_TEAM: PJ68SLPTTB
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+targets:
+  macgip:
+    type: application
+    platform: macOS
+    sources:
+      - path: app
+        excludes: ["Info.plist", "*.entitlements"]
+    info:
+      path: app/Info.plist
+      properties:
+        CFBundleDisplayName: macgip
+        LSMinimumSystemVersion: "15.0"
+        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."
+        LSApplicationCategoryType: public.app-category.utilities
+    entitlements:
+      path: app/macgip.entitlements
+      properties:
+        com.apple.developer.system-extension.install: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.leetrout.macgip
+        PRODUCT_NAME: macgip
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - target: macgipDriver
+        embed: true
+        codeSign: true
+  macgipDriver:
+    type: driver-extension
+    platform: macOS
+    sources:
+      - path: driver
+        excludes: ["Info.plist", "*.entitlements"]
+      - path: gip/gip.c
+      - path: gip/gip.h
+    info:
+      path: driver/Info.plist
+      properties:
+        CFBundlePackageType: DEXT
+        CFBundleDisplayName: macgip driver
+        OSBundleUsageDescription: "Driver for wired GIP gamepads compatible with Xbox controllers that macOS does not support."
+        OSMinimumDriverKitVersion: "24.0"
+        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."
+        IOKitPersonalities:
+          # Device level: select configuration 1. macOS leaves this vendor-class device unconfigured.
+          macgipUSBDevice:
+            CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleIdentifierKernel: com.apple.kpi.iokit
+            IOClass: IOUserService
+            IOUserClass: MacgipUSBDevice
+            IOProviderClass: IOUSBHostDevice
+            IOUserServerName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            IOMatchCategory: $(PRODUCT_BUNDLE_IDENTIFIER)
+            idVendor: 8406
+            idProduct: 8199
+            bDeviceClass: 255
+          # Interface level: the GIP control interface becomes a HID gamepad.
+          macgipGamepad:
+            CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleIdentifierKernel: com.apple.kpi.iokit
+            IOClass: AppleUserHIDDevice
+            IOUserClass: MacgipGamepad
+            IOProviderClass: IOUSBHostInterface
+            IOUserServerName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            idVendor: 8406
+            idProduct: 8199
+            bInterfaceNumber: 0
+            bInterfaceClass: 255
+            bInterfaceSubClass: 71
+            bInterfaceProtocol: 208
+    entitlements:
+      path: driver/macgipDriver.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.developer.driverkit: true
+        com.apple.developer.driverkit.family.hid.device: true
+        com.apple.developer.driverkit.transport.usb:
+          - idVendor: 8406
+    dependencies:
+      - sdk: DriverKit.framework
+      - sdk: USBDriverKit.framework
+      - sdk: HIDDriverKit.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.leetrout.macgip.driver
+        PRODUCT_NAME: com.leetrout.macgip.driver
+        SDKROOT: driverkit
+        DRIVERKIT_DEPLOYMENT_TARGET: "24.0"
+        ARCHS: arm64e
+        VALID_ARCHS: arm64e
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Development"
+        PROVISIONING_PROFILE_SPECIFIER: "macgip driver dev"
+        GENERATE_INFOPLIST_FILE: NO
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/gip"
+        CLANG_CXX_LANGUAGE_STANDARD: c++17
+        GCC_C_LANGUAGE_STANDARD: c11
+schemes:
+  macgip:
+    build:
+      targets:
+        macgip: all
+        macgipDriver: all
