@@ -16,8 +16,16 @@ run = "dprint check"
 
 [tasks.check]
 description = "Run all checks: formatting and secret scan (what prek hooks run)"
-depends = ["fmt-check"]
+depends = ["fmt-check", "test"]
 run = "gitleaks git --no-banner ."
+
+[tasks.test]
+description = "Build and run the protocol core tests, replaying every probe capture"
+run = """
+mkdir -p build
+clang -std=c11 -Wall -Wextra -Werror -O1 -o build/test_gip gip/gip.c gip/test_gip.c
+build/test_gip notes/captures/2026-10-11-probe-run*.txt
+"""
 
 [tasks.hooks]
 description = "Install the git hooks with prek"
