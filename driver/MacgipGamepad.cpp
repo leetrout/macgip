@@ -171,11 +171,12 @@ static uint8_t *bufferBytes(IOBufferMemoryDescriptor *buffer)
     return reinterpret_cast<uint8_t *>(range.address);
 }
 
-// Synchronous write used only during start, before the read loop runs.
+// Synchronous write used only during start, before the read loop runs. Interrupt pipes do not
+// support a completion timeout, so it is always 0.
 static kern_return_t writeSync(MacgipGamepad_IVars *iv, size_t length)
 {
     uint32_t sent = 0;
-    return iv->outPipe->IO(iv->outBuffer, static_cast<uint32_t>(length), &sent, 1000);
+    return iv->outPipe->IO(iv->outBuffer, static_cast<uint32_t>(length), &sent, 0);
 }
 
 bool MacgipGamepad::handleStart(IOService *provider)
@@ -373,7 +374,7 @@ static void sendRumble(MacgipGamepad_IVars *iv)
     iv->outBuffer->SetLength(static_cast<uint64_t>(n));
     iv->writeBusy = true;
     iv->rumblePending = false;
-    if (iv->outPipe->AsyncIO(iv->outBuffer, static_cast<uint32_t>(n), iv->writeAction, 1000) != kIOReturnSuccess) {
+    if (iv->outPipe->AsyncIO(iv->outBuffer, static_cast<uint32_t>(n), iv->writeAction, 0) != kIOReturnSuccess) {
         iv->writeBusy = false;
     }
 }
