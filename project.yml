@@ -85,12 +85,12 @@ targets:
             IOUserClass: MacgipGamepad
             IOProviderClass: IOUSBHostInterface
             IOUserServerName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            # IOUSBHostInterface accepts only fixed key combinations. This is the documented
+            # "idVendor + idProduct + bConfigurationValue + bInterfaceNumber" combination.
             idVendor: 8406
             idProduct: 8199
+            bConfigurationValue: 1
             bInterfaceNumber: 0
-            bInterfaceClass: 255
-            bInterfaceSubClass: 71
-            bInterfaceProtocol: 208
     entitlements:
       path: driver/macgipDriver.entitlements
       properties:

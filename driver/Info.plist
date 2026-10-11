@@ -36,14 +36,10 @@
 			<string>MacgipGamepad</string>
 			<key>IOUserServerName</key>
 			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-			<key>bInterfaceClass</key>
-			<integer>255</integer>
+			<key>bConfigurationValue</key>
+			<integer>1</integer>
 			<key>bInterfaceNumber</key>
 			<integer>0</integer>
-			<key>bInterfaceProtocol</key>
-			<integer>208</integer>
-			<key>bInterfaceSubClass</key>
-			<integer>71</integer>
 			<key>idProduct</key>
 			<integer>8199</integer>
 			<key>idVendor</key>
