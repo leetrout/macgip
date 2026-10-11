@@ -89,8 +89,11 @@ targets:
         com.apple.security.app-sandbox: true
         com.apple.developer.driverkit: true
         com.apple.developer.driverkit.family.hid.device: true
+        # The development profile grants idVendor "*". The signed value must match it exactly,
+        # or AMFI refuses to launch the driver. Scope this to 8406 once Apple grants the
+        # distribution entitlement with a real vendor list.
         com.apple.developer.driverkit.transport.usb:
-          - idVendor: 8406
+          - idVendor: "*"
     dependencies:
       - sdk: DriverKit.framework
       - sdk: USBDriverKit.framework

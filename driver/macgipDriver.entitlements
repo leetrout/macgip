@@ -10,7 +10,7 @@
 	<array>
 		<dict>
 			<key>idVendor</key>
-			<integer>8406</integer>
+			<string>*</string>
 		</dict>
 	</array>
 	<key>com.apple.security.app-sandbox</key>
