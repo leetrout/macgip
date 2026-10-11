@@ -9,6 +9,8 @@ options:
 settings:
   base:
     DEVELOPMENT_TEAM: PJ68SLPTTB
+    # Overridden per build by `mise run build-driver` so macOS replaces the installed extension.
+    CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "6.0"
     MACOSX_DEPLOYMENT_TARGET: "15.0"
 targets:
@@ -22,6 +24,8 @@ targets:
       path: app/Info.plist
       properties:
         CFBundleDisplayName: macgip
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSMinimumSystemVersion: "15.0"
         NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."
         LSApplicationCategoryType: public.app-category.utilities
@@ -53,6 +57,8 @@ targets:
       properties:
         CFBundlePackageType: DEXT
         CFBundleDisplayName: macgip driver
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         OSBundleUsageDescription: "Driver for wired GIP gamepads compatible with Xbox controllers that macOS does not support."
         OSMinimumDriverKitVersion: "24.0"
         NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."

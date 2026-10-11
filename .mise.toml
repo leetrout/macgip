@@ -34,7 +34,17 @@ run = "xcodegen generate --quiet"
 [tasks.build-driver]
 description = "Build the host app and the driver extension (Debug)"
 depends = ["xcodeproj"]
-run = "xcodebuild -project macgip.xcodeproj -scheme macgip -configuration Debug -derivedDataPath build/DerivedData -allowProvisioningUpdates build | tail -20"
+run = "xcodebuild -project macgip.xcodeproj -scheme macgip -configuration Debug -derivedDataPath build/DerivedData -allowProvisioningUpdates CURRENT_PROJECT_VERSION=$(date +%Y%m%d%H%M%S) build | tail -20"
+
+[tasks.stage]
+description = "Copy the Debug build to /Applications and open it"
+depends = ["build-driver"]
+run = """
+osascript -e 'quit app "macgip"' 2>/dev/null || true
+rm -rf /Applications/macgip.app
+cp -R build/DerivedData/Build/Products/Debug/macgip.app /Applications/macgip.app
+open /Applications/macgip.app
+"""
 
 [tasks.hooks]
 description = "Install the git hooks with prek"
