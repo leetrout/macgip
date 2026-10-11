@@ -9,8 +9,9 @@ options:
 settings:
   base:
     DEVELOPMENT_TEAM: PJ68SLPTTB
-    # Overridden per build by `mise run build-driver` so macOS replaces the installed extension.
-    CURRENT_PROJECT_VERSION: "1"
+    # Overridden per build by `mise run build-driver` (1.<day of year>.<HHMM>) so macOS replaces
+    # the installed extension. A driver version must be a kext version: up to three integers.
+    CURRENT_PROJECT_VERSION: "1.0.0"
     SWIFT_VERSION: "6.0"
     MACOSX_DEPLOYMENT_TARGET: "15.0"
 targets:
