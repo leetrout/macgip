@@ -1,0 +1,9 @@
+2026-10-11 14:54:02.563 sdl_test_src[32490:1772092] App name: sdl_test_src
+2026-10-11 14:54:02.564 sdl_test_src[32490:1772092] App version: <unspecified>
+2026-10-11 14:54:02.564 sdl_test_src[32490:1772092] App ID: <unspecified>
+2026-10-11 14:54:02.564 sdl_test_src[32490:1772092] SDL revision: SDL-3.5.0-ce3af25
+2026-10-11 14:54:02.578 sdl_test_src[32490:1772092] Added HIDAPI device 'USB Headphone Set' VID 0x0c76, PID 0x1607, bluetooth 0, version 256, serial NONE, interface 3, interface_class 3, interface_subclass 0, interface_protocol 0, usage page 0x0000, usage 0x0000, path = 1-1.3.4:1.3, driver = NONE (DISABLED)
+2026-10-11 14:54:10.610 sdl_test_src[32490:1772092] Removing HIDAPI device 'USB Headphone Set' VID 0x0c76, PID 0x1607, bluetooth 0, version 256, serial NONE, interface 3, interface_class 3, interface_subclass 0, interface_protocol 0, usage page 0x0000, usage 0x0000, path = 1-1.3.4:1.3, driver = NONE (DISABLED)
+SDL 3005000
+ hid: 0c76:1607 bus=1 iface=3 class=3/0/0 usage=0000/0000 path=1-1.3.4:1.3 product=USB Headphone Set
+joysticks: 0

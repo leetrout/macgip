@@ -1,0 +1,33 @@
+[tools]
+dprint = "latest"
+prek = "latest"
+gitleaks = "latest"
+
+[env]
+PKG_CONFIG_PATH = "/opt/homebrew/lib/pkgconfig"
+
+[tasks.fmt]
+description = "Autofix markdown formatting with dprint"
+run = "dprint fmt"
+
+[tasks.fmt-check]
+description = "Check markdown formatting (no writes)"
+run = "dprint check"
+
+[tasks.check]
+description = "Run all checks: formatting and secret scan (what prek hooks run)"
+depends = ["fmt-check"]
+run = "gitleaks git --no-banner ."
+
+[tasks.hooks]
+description = "Install the git hooks with prek"
+run = "prek install"
+
+[tasks.build-tools]
+description = "Build the investigation tools into build/"
+run = """
+mkdir -p build
+clang -o build/usbdesc tools/usbdesc.c -framework IOKit -framework CoreFoundation
+clang -O1 -o build/gip_probe tools/gip_probe.c $(pkg-config --cflags --libs libusb-1.0) -lpthread
+clang -o build/sdl_test tools/sdl_test.c $(pkg-config --cflags --libs sdl3)
+"""

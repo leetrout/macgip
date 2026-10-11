@@ -1,0 +1,16 @@
+{
+  // dprint owns ALL formatting/whitespace (fmt is the autofixer). markdownlint is reduced
+  // to semantic rules only so the two tools do not fight.
+  "config": {
+    "default": false,
+    "MD024": { "siblings_only": true }, // no duplicate headings under the same parent
+    "MD040": true, // fenced code blocks must declare a language
+    "MD042": true, // no empty links
+    "MD045": true, // images need alt text
+    "MD051": true, // link fragments (#anchors) must be valid
+    "MD052": true, // referenced link/image labels must be defined
+    "MD053": true // no unused link/image reference definitions
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules", ".git"]
+}

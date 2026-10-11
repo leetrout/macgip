@@ -1,0 +1,197 @@
+2026-10-11 14:54:39.183 sdl_test_src[32522:1772614] App name: sdl_test_src
+2026-10-11 14:54:39.183 sdl_test_src[32522:1772614] App version: <unspecified>
+2026-10-11 14:54:39.183 sdl_test_src[32522:1772614] App ID: <unspecified>
+2026-10-11 14:54:39.183 sdl_test_src[32522:1772614] SDL revision: SDL-3.5.0-ce3af25
+[timestamp] [threadID] facility level [function call] <message>
+--------------------------------------------------------------------------------
+[ 0.000005] [001b0c46] libusb: debug [libusb_init_context] libusb v1.0.30.12037
+[ 0.000016] [001b0c46] libusb: debug [usbi_add_event_source] add fd 3 events 1
+[ 0.000047] [001b0c52] libusb: debug [darwin_event_thread_main] creating hotplug event source
+[ 0.000147] [001b0c52] libusb: debug [darwin_event_thread_main] darwin event thread ready to receive events
+[ 0.000234] [001b0c46] libusb: debug [darwin_get_cached_device] finding cached device for sessionID 0x1b8f7c70e1f
+[ 0.000254] [001b0c46] libusb: debug [darwin_get_cached_device] caching new device with sessionID 0x1b8f7c70e1f
+[ 0.001283] [001b0c46] libusb: debug [darwin_cache_device_descriptor] cached device descriptor:
+[ 0.001285] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDescriptorType:    0x01
+[ 0.001286] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdUSB:             0x0210
+[ 0.001287] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceClass:       0x09
+[ 0.001287] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceSubClass:    0x00
+[ 0.001288] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceProtocol:    0x02
+[ 0.001289] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bMaxPacketSize0:    0x40
+[ 0.001290] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idVendor:           0x2109
+[ 0.001291] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idProduct:          0x2817
+[ 0.001291] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdDevice:          0x0384
+[ 0.001292] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iManufacturer:      0x01
+[ 0.001293] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iProduct:           0x02
+[ 0.001293] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iSerialNumber:      0x00
+[ 0.001294] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bNumConfigurations: 0x01
+[ 0.001303] [001b0c46] libusb: debug [darwin_check_configuration] active config: 1, first config: 1
+[ 0.001304] [001b0c46] libusb: debug [process_new_device] allocating new device in context 0x105535dc0 for with session 0x1b8f7c70e1f
+[ 0.001305] [001b0c46] libusb: debug [process_new_device] found device with address 1 port = 1 parent = 0x0 at 0xc5a8002ba
+[ 0.001341] [001b0c46] libusb: debug [darwin_get_cached_device] finding cached device for sessionID 0x1b8fb744584
+[ 0.001352] [001b0c46] libusb: debug [darwin_get_cached_device] parent sessionID: 0x1b8f7c70e1f
+[ 0.001353] [001b0c46] libusb: debug [darwin_get_cached_device] matching sessionID/locationID 0x1b8fb744584/0x1130000 against cached device with sessionID/locationID 0x1b8f7c70e1f/0x1100000
+[ 0.001354] [001b0c46] libusb: debug [darwin_get_cached_device] caching new device with sessionID 0x1b8fb744584
+[ 0.001457] [001b0c46] libusb: debug [darwin_cache_device_descriptor] cached device descriptor:
+[ 0.001459] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDescriptorType:    0x01
+[ 0.001459] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdUSB:             0x0210
+[ 0.001460] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceClass:       0x09
+[ 0.001461] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceSubClass:    0x00
+[ 0.001462] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceProtocol:    0x02
+[ 0.001462] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bMaxPacketSize0:    0x40
+[ 0.001463] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idVendor:           0x2109
+[ 0.001464] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idProduct:          0x2817
+[ 0.001464] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdDevice:          0x0384
+[ 0.001465] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iManufacturer:      0x01
+[ 0.001466] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iProduct:           0x02
+[ 0.001466] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iSerialNumber:      0x00
+[ 0.001467] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bNumConfigurations: 0x01
+[ 0.001473] [001b0c46] libusb: debug [darwin_check_configuration] active config: 1, first config: 1
+[ 0.001474] [001b0c46] libusb: debug [process_new_device] allocating new device in context 0x105535dc0 for with session 0x1b8fb744584
+[ 0.001475] [001b0c46] libusb: debug [process_new_device] found device with address 3 port = 3 parent = 0xc5ac0c800 at 0xc5a80023a
+[ 0.001504] [001b0c46] libusb: debug [darwin_get_cached_device] finding cached device for sessionID 0x1b8fcbdb125
+[ 0.001514] [001b0c46] libusb: debug [darwin_get_cached_device] parent sessionID: 0x1b8fb744584
+[ 0.001516] [001b0c46] libusb: debug [darwin_get_cached_device] matching sessionID/locationID 0x1b8fcbdb125/0x1131000 against cached device with sessionID/locationID 0x1b8fb744584/0x1130000
+[ 0.001517] [001b0c46] libusb: debug [darwin_get_cached_device] matching sessionID/locationID 0x1b8fcbdb125/0x1131000 against cached device with sessionID/locationID 0x1b8f7c70e1f/0x1100000
+[ 0.001518] [001b0c46] libusb: debug [darwin_get_cached_device] caching new device with sessionID 0x1b8fcbdb125
+[ 0.001632] [001b0c46] libusb: debug [darwin_cache_device_descriptor] cached device descriptor:
+[ 0.001634] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDescriptorType:    0x01
+[ 0.001634] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdUSB:             0x0210
+[ 0.001635] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceClass:       0x00
+[ 0.001635] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceSubClass:    0x00
+[ 0.001636] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceProtocol:    0x00
+[ 0.001637] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bMaxPacketSize0:    0x40
+[ 0.001637] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idVendor:           0x0bda
+[ 0.001638] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idProduct:          0x8153
+[ 0.001639] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdDevice:          0x3000
+[ 0.001639] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iManufacturer:      0x01
+[ 0.001640] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iProduct:           0x02
+[ 0.001640] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iSerialNumber:      0x06
+[ 0.001641] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bNumConfigurations: 0x02
+[ 0.001930] [001b0c46] libusb: debug [darwin_check_configuration] active config: 2, first config: 1
+[ 0.001933] [001b0c46] libusb: debug [process_new_device] allocating new device in context 0x105535dc0 for with session 0x1b8fcbdb125
+[ 0.001934] [001b0c46] libusb: debug [process_new_device] found device with address 4 port = 1 parent = 0xc5ac0c880 at 0xc5a8003ba
+[ 0.001964] [001b0c46] libusb: debug [darwin_get_cached_device] finding cached device for sessionID 0x1b8fd3e54ba
+[ 0.001973] [001b0c46] libusb: debug [darwin_get_cached_device] parent sessionID: 0x1b8fb744584
+[ 0.001974] [001b0c46] libusb: debug [darwin_get_cached_device] matching sessionID/locationID 0x1b8fd3e54ba/0x1134000 against cached device with sessionID/locationID 0x1b8fcbdb125/0x1131000
+[ 0.001976] [001b0c46] libusb: debug [darwin_get_cached_device] matching sessionID/locationID 0x1b8fd3e54ba/0x1134000 against cached device with sessionID/locationID 0x1b8fb744584/0x1130000
+[ 0.001977] [001b0c46] libusb: debug [darwin_get_cached_device] matching sessionID/locationID 0x1b8fd3e54ba/0x1134000 against cached device with sessionID/locationID 0x1b8f7c70e1f/0x1100000
+[ 0.001978] [001b0c46] libusb: debug [darwin_get_cached_device] caching new device with sessionID 0x1b8fd3e54ba
+[ 0.002067] [001b0c46] libusb: debug [darwin_cache_device_descriptor] cached device descriptor:
+[ 0.002069] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDescriptorType:    0x01
+[ 0.002069] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdUSB:             0x0110
+[ 0.002070] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceClass:       0x00
+[ 0.002071] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceSubClass:    0x00
+[ 0.002071] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bDeviceProtocol:    0x00
+[ 0.002072] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bMaxPacketSize0:    0x40
+[ 0.002073] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idVendor:           0x0c76
+[ 0.002073] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   idProduct:          0x1607
+[ 0.002074] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bcdDevice:          0x0100
+[ 0.002075] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iManufacturer:      0x00
+[ 0.002075] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iProduct:           0x01
+[ 0.002076] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   iSerialNumber:      0x00
+[ 0.002077] [001b0c46] libusb: debug [darwin_cache_device_descriptor]   bNumConfigurations: 0x01
+[ 0.002081] [001b0c46] libusb: debug [darwin_check_configuration] active config: 1, first config: 1
+[ 0.002082] [001b0c46] libusb: debug [process_new_device] allocating new device in context 0x105535dc0 for with session 0x1b8fd3e54ba
+[ 0.002083] [001b0c46] libusb: debug [process_new_device] found device with address 5 port = 4 parent = 0xc5ac0c880 at 0xc5a80043a
+[ 0.002086] [001b0c46] libusb: debug [libusb_init_context] installing new context as implicit default
+[ 0.002087] [001b0c46] libusb: debug [libusb_hotplug_register_callback] new hotplug cb 0xc5b014780 with handle 1
+[ 0.002122] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.002125] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] doing our own event handling
+[ 0.002126] [001b0c53] libusb: debug [handle_events] event sources modified, reallocating event data
+[ 0.002127] [001b0c53] libusb: debug [usbi_wait_for_events] poll() 1 fds with timeout in 60000ms
+[ 0.003651] [001b0c46] libusb: debug [libusb_get_device_list]  
+[ 0.003669] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.003671] [001b0c46] libusb: debug [parse_endpoint] skipping descriptor 0x25
+[ 0.003673] [001b0c46] libusb: debug [parse_endpoint] skipping descriptor 0x25
+[ 0.003674] [001b0c46] libusb: debug [libusb_open] open 1.5
+[ 0.003703] [001b0c46] libusb: debug [darwin_open] device open for access
+[ 0.003707] [001b0c46] libusb: debug [libusb_submit_transfer] transfer 0x105535928
+[ 0.003731] [001b0c46] libusb: debug [libusb_get_next_timeout] no URB with timeout or all handled by OS; no timeout!
+[ 0.003733] [001b0c46] libusb: debug [libusb_handle_events_timeout_completed] another thread is doing event handling
+[ 0.003886] [001b0c52] libusb: debug [darwin_async_io_callback] an async io operation has completed
+[ 0.003929] [001b0c53] libusb: debug [usbi_wait_for_events] poll() returned 1
+[ 0.003931] [001b0c53] libusb: debug [handle_event_trigger] event triggered
+[ 0.003932] [001b0c53] libusb: debug [darwin_handle_transfer_completion] handling transfer completion type control with kernel status 0
+[ 0.003933] [001b0c53] libusb: debug [usbi_handle_transfer_completion] transfer 0x105535928 has callback 0x1048b98c0
+[ 0.003934] [001b0c53] libusb: debug [sync_transfer_cb] actual_length=4
+[ 0.003940] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.003941] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] doing our own event handling
+[ 0.003942] [001b0c53] libusb: debug [usbi_wait_for_events] poll() 1 fds with timeout in 60000ms
+[ 0.003945] [001b0c46] libusb: debug [libusb_free_transfer] transfer 0x105535928
+[ 0.003947] [001b0c46] libusb: debug [libusb_submit_transfer] transfer 0x105535928
+[ 0.003974] [001b0c46] libusb: debug [libusb_get_next_timeout] no URB with timeout or all handled by OS; no timeout!
+[ 0.003975] [001b0c46] libusb: debug [libusb_handle_events_timeout_completed] another thread is doing event handling
+[ 0.004155] [001b0c52] libusb: debug [darwin_async_io_callback] an async io operation has completed
+[ 0.004169] [001b0c53] libusb: debug [usbi_wait_for_events] poll() returned 1
+[ 0.004170] [001b0c53] libusb: debug [handle_event_trigger] event triggered
+[ 0.004171] [001b0c53] libusb: debug [darwin_handle_transfer_completion] handling transfer completion type control with kernel status 0
+[ 0.004171] [001b0c53] libusb: debug [usbi_handle_transfer_completion] transfer 0x105535928 has callback 0x1048b98c0
+[ 0.004172] [001b0c53] libusb: debug [sync_transfer_cb] actual_length=4
+[ 0.004174] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.004175] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] doing our own event handling
+[ 0.004176] [001b0c53] libusb: debug [usbi_wait_for_events] poll() 1 fds with timeout in 60000ms
+[ 0.004183] [001b0c46] libusb: debug [libusb_free_transfer] transfer 0x105535928
+[ 0.004184] [001b0c46] libusb: debug [libusb_submit_transfer] transfer 0x105535928
+[ 0.004194] [001b0c46] libusb: debug [libusb_get_next_timeout] no URB with timeout or all handled by OS; no timeout!
+[ 0.004196] [001b0c46] libusb: debug [libusb_handle_events_timeout_completed] another thread is doing event handling
+[ 0.004201] [001b0c52] libusb: debug [darwin_async_io_callback] an async io operation has completed
+[ 0.004210] [001b0c53] libusb: debug [usbi_wait_for_events] poll() returned 1
+[ 0.004211] [001b0c53] libusb: debug [handle_event_trigger] event triggered
+[ 0.004212] [001b0c53] libusb: debug [darwin_handle_transfer_completion] handling transfer completion type control with kernel status 0
+[ 0.004213] [001b0c53] libusb: debug [usbi_handle_transfer_completion] transfer 0x105535928 has callback 0x1048b98c0
+[ 0.004214] [001b0c53] libusb: debug [sync_transfer_cb] actual_length=56
+[ 0.004217] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.004218] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] doing our own event handling
+[ 0.004219] [001b0c53] libusb: debug [usbi_wait_for_events] poll() 1 fds with timeout in 60000ms
+[ 0.004226] [001b0c46] libusb: debug [libusb_free_transfer] transfer 0x105535928
+[ 0.004233] [001b0c46] libusb: debug [libusb_close]  
+[ 0.004241] [001b0c53] libusb: debug [usbi_wait_for_events] poll() returned 1
+[ 0.004242] [001b0c53] libusb: debug [handle_event_trigger] event triggered
+[ 0.004243] [001b0c53] libusb: debug [handle_event_trigger] someone is closing a device
+[ 0.004246] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.004250] [001b0c53] libusb: debug [libusb_try_lock_events] someone else is closing a device
+[ 0.004251] [001b0c53] libusb: debug [libusb_event_handler_active] someone else is closing a device
+[ 0.004251] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] another thread is doing event handling
+[ 0.004263] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.004266] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.004267] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.004271] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.004273] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] doing our own event handling
+[ 0.004274] [001b0c53] libusb: debug [usbi_wait_for_events] poll() 1 fds with timeout in 60000ms
+2026-10-11 14:54:39.192 sdl_test_src[32522:1772614] Added HIDAPI device 'USB Headphone Set' VID 0x0c76, PID 0x1607, bluetooth 0, version 256, serial NONE, interface 3, interface_class 3, interface_subclass 0, interface_protocol 0, usage page 0x0000, usage 0x0000, path = 1-1.3.4:1.3, driver = NONE (DISABLED)
+[ 0.013991] [001b0c46] libusb: debug [libusb_get_device_list]  
+[ 0.014012] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.014018] [001b0c46] libusb: debug [parse_endpoint] skipping descriptor 0x25
+[ 0.014020] [001b0c46] libusb: debug [parse_endpoint] skipping descriptor 0x25
+[ 0.014021] [001b0c46] libusb: debug [libusb_open] open 1.5
+[ 0.014057] [001b0c46] libusb: debug [darwin_open] device open for access
+[ 0.014060] [001b0c46] libusb: debug [libusb_close]  
+[ 0.014068] [001b0c53] libusb: debug [usbi_wait_for_events] poll() returned 1
+[ 0.014070] [001b0c53] libusb: debug [handle_event_trigger] event triggered
+[ 0.014071] [001b0c53] libusb: debug [handle_event_trigger] someone is closing a device
+[ 0.014074] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.014075] [001b0c53] libusb: debug [libusb_try_lock_events] someone else is closing a device
+[ 0.014076] [001b0c53] libusb: debug [libusb_event_handler_active] someone else is closing a device
+[ 0.014077] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] another thread is doing event handling
+[ 0.014099] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.014106] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.014108] [001b0c46] libusb: debug [libusb_get_device_descriptor]  
+[ 0.014133] [001b0c53] libusb: debug [libusb_get_next_timeout] no URBs, no timeout!
+[ 0.014136] [001b0c53] libusb: debug [libusb_handle_events_timeout_completed] doing our own event handling
+[ 0.014137] [001b0c53] libusb: debug [usbi_wait_for_events] poll() 1 fds with timeout in 60000ms
+2026-10-11 14:54:42.207 sdl_test_src[32522:1772614] Removing HIDAPI device 'USB Headphone Set' VID 0x0c76, PID 0x1607, bluetooth 0, version 256, serial NONE, interface 3, interface_class 3, interface_subclass 0, interface_protocol 0, usage page 0x0000, usage 0x0000, path = 1-1.3.4:1.3, driver = NONE (DISABLED)
+[ 3.021660] [001b0c46] libusb: debug [libusb_interrupt_event_handler]  
+[ 3.021695] [001b0c53] libusb: debug [usbi_wait_for_events] poll() returned 1
+[ 3.021698] [001b0c53] libusb: debug [handle_event_trigger] event triggered
+[ 3.021700] [001b0c53] libusb: debug [handle_event_trigger] someone purposefully interrupted
+[ 3.021753] [001b0c46] libusb: debug [libusb_hotplug_deregister_callback] deregister hotplug cb 1
+[ 3.021760] [001b0c46] libusb: debug [libusb_exit]  
+[ 3.021764] [001b0c46] libusb: debug [libusb_unref_device] destroy device 1.5
+[ 3.021765] [001b0c46] libusb: debug [libusb_unref_device] destroy device 1.4
+[ 3.021767] [001b0c46] libusb: debug [libusb_unref_device] destroy device 1.3
+[ 3.021769] [001b0c46] libusb: debug [libusb_unref_device] destroy device 1.1
+[ 3.021789] [001b0c52] libusb: debug [darwin_event_thread_main] darwin event thread exiting
+[ 3.022734] [001b0c46] libusb: debug [usbi_remove_event_source] remove fd 3
+SDL 3005000
+ hid: 0c76:1607 bus=1 iface=3 class=3/0/0 usage=0000/0000 path=1-1.3.4:1.3 product=USB Headphone Set
+joysticks: 0

@@ -1,0 +1,6 @@
+2026-10-11 14:53:04.232 sdl_test_src[32430:1771204] App name: sdl_test_src
+2026-10-11 14:53:04.232 sdl_test_src[32430:1771204] App version: <unspecified>
+2026-10-11 14:53:04.232 sdl_test_src[32430:1771204] App ID: <unspecified>
+2026-10-11 14:53:04.232 sdl_test_src[32430:1771204] SDL revision: SDL-3.5.0-ce3af25
+SDL 3005000
+joysticks: 0

@@ -1,0 +1,6 @@
+2026-10-11 14:23:18.492 sdl_test[19039:1723664] App name: sdl_test
+2026-10-11 14:23:18.492 sdl_test[19039:1723664] App version: <unspecified>
+2026-10-11 14:23:18.492 sdl_test[19039:1723664] App ID: <unspecified>
+2026-10-11 14:23:18.492 sdl_test[19039:1723664] SDL revision: SDL-release-3.4.12-0-gf87239e71
+SDL 3004012
+joysticks: 0

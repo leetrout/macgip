@@ -1,0 +1,45 @@
+# OS cruft
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*~
+.directory
+.Trash-*
+.nfs*
+
+# Editor scratch
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs (probe logs that belong in the repo go in notes/captures/ as .txt)
+*.log
+
+# Build output and caches
+build/
+dist/
+coverage/
+.cache/
+DerivedData/
+*.o
+*.dSYM/
+*.xcuserstate
+xcuserdata/
+.venv/
+node_modules/
+
+# Local scratch
+scratch/

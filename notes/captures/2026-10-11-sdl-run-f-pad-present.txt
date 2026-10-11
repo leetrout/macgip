@@ -1,0 +1,16 @@
+2026-10-11 15:03:37.937 sdl_test_src[32868:1781538] App name: sdl_test_src
+2026-10-11 15:03:37.938 sdl_test_src[32868:1781538] App version: <unspecified>
+2026-10-11 15:03:37.938 sdl_test_src[32868:1781538] App ID: <unspecified>
+2026-10-11 15:03:37.938 sdl_test_src[32868:1781538] SDL revision: SDL-3.5.0-ce3af25
+2026-10-11 15:03:37.971 sdl_test_src[32868:1781538] Added HIDAPI device 'PowerA Xbox Series X Wired Controller Red' VID 0x20d6, PID 0x2007, bluetooth 0, version 359, serial 00006DC0123C9CAB, interface 0, interface_class 255, interface_subclass 71, interface_protocol 208, usage page 0x0000, usage 0x0000, path = 1-1.2:1.0, driver = SDL_JOYSTICK_HIDAPI_XBOX_ONE (ENABLED)
+2026-10-11 15:03:37.971 sdl_test_src[32868:1781538] Added HIDAPI device 'USB Headphone Set' VID 0x0c76, PID 0x1607, bluetooth 0, version 256, serial NONE, interface 3, interface_class 3, interface_subclass 0, interface_protocol 0, usage page 0x0000, usage 0x0000, path = 1-1.3.4:1.3, driver = NONE (DISABLED)
+2026-10-11 15:03:53.713 sdl_test_src[32868:1781538] Removing HIDAPI device 'PowerA Xbox Series X Wired Controller Red' VID 0x20d6, PID 0x2007, bluetooth 0, version 359, serial 00006DC0123C9CAB, interface 0, interface_class 255, interface_subclass 71, interface_protocol 208, usage page 0x0000, usage 0x0000, path = 1-1.2:1.0, driver = SDL_JOYSTICK_HIDAPI_XBOX_ONE (ENABLED)
+2026-10-11 15:03:53.717 sdl_test_src[32868:1781538] Removing HIDAPI device 'USB Headphone Set' VID 0x0c76, PID 0x1607, bluetooth 0, version 256, serial NONE, interface 3, interface_class 3, interface_subclass 0, interface_protocol 0, usage page 0x0000, usage 0x0000, path = 1-1.3.4:1.3, driver = NONE (DISABLED)
+SDL 3005000
+ hid: 20d6:2007 bus=1 iface=0 class=255/71/208 usage=0000/0000 path=1-1.2:1.0 product=Xbox Series X Wired Controller Red
+ hid: 0c76:1607 bus=1 iface=3 class=3/0/0 usage=0000/0000 path=1-1.3.4:1.3 product=USB Headphone Set
+joysticks: 1
+ [1] name="PowerA Xbox Series X Wired Controller Red" vid=0x20d6 pid=0x2007 type=1 gamepad=1 path=1-1.2:1.0
+  opened gamepad: PowerA Xbox Series X Wired Controller Red (err: No HID devices found in the system.)
+gamepad added id=1
+rumble test (0.5 s low): ok

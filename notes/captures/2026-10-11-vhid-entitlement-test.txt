@@ -1,0 +1,20 @@
+Virtual HID creation test, 2026-10-11, macOS 26.5.2, SIP enabled, uid 501.
+Source: tools/vhid_test.swift, tools/vhid_test.entitlements.
+
+Run 1: plain build (ad-hoc signature, no entitlements)
+  IOHIDUserDevice: create FAILED (returned nil)
+  CoreHID HIDVirtualDevice: create FAILED (nil)
+  hidutil list: no "test gamepad" device
+
+Run 2: ad-hoc signed with com.apple.developer.hid.virtual.device = true
+  Process killed at exec, exit 137. Kernel log:
+    AMFI: '.../vhid_ent' is adhoc signed.
+    amfid: not valid: Error Domain=AppleMobileFileIntegrityError Code=-424
+      "The file is adhoc signed but contains restricted entitlements"
+    kernel: Code has restricted entitlements, but the validation of its code signature failed.
+    (AppleSystemPolicy) ASP: Security policy would not allow process
+
+Source check (apple-oss-distributions/IOHIDFamily, IOHIDResourceUserClient.cpp, initWithTask):
+  Access needs com.apple.hid.manager.user-access-device (Apple internal, sets _privileged)
+  or com.apple.developer.hid.virtual.device. There is no root / admin check.
+  So running the daemon as root does not help.

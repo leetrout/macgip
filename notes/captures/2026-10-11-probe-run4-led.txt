@@ -1,0 +1,24 @@
+   0.003 opened 20d6:2007, current configuration=0
+   0.003 set_configuration(1): ok
+   0.030 claim_interface(0): ok
+   0.030 --- listening 2 s for unprompted traffic
+   0.035 IN   32: 02 20 01 1c ab 9c 3c 12 c0 6d 00 00 d6 20 07 20 01 00 05 00 a7 00 4d 05 02 0e 01 00 01 00 01 00
+         ANNOUNCE (cmd 0x02)
+   0.487 IN   32: 02 20 02 1c ab 9c 3c 12 c0 6d 00 00 d6 20 07 20 01 00 05 00 a7 00 4d 05 02 0e 01 00 01 00 01 00
+         ANNOUNCE (cmd 0x02)
+   0.987 IN   32: 02 20 03 1c ab 9c 3c 12 c0 6d 00 00 d6 20 07 20 01 00 05 00 a7 00 4d 05 02 0e 01 00 01 00 01 00
+         ANNOUNCE (cmd 0x02)
+   1.487 IN   32: 02 20 04 1c ab 9c 3c 12 c0 6d 00 00 d6 20 07 20 01 00 05 00 a7 00 4d 05 02 0e 01 00 01 00 01 00
+         ANNOUNCE (cmd 0x02)
+   1.987 IN   32: 02 20 05 1c ab 9c 3c 12 c0 6d 00 00 d6 20 07 20 01 00 05 00 a7 00 4d 05 02 0e 01 00 01 00 01 00
+         ANNOUNCE (cmd 0x02)
+   2.035 --- send power-on (05 20 seq 01 00)
+   2.035 OUT   5: 05 20 00 01 00
+   2.039 IN    8: 03 20 01 04 80 00 00 00
+         STATUS (cmd 0x03)
+   2.043 IN   36: 20 00 01 20 00 00 00 00 00 00 6d 00 b4 fe 74 f9 b8 fe 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+         INPUT  ----  dpad:----   LT=   0 RT=   0  LX=   109 LY=  -332 RX= -1676 RY=  -328
+   4.043 --- send guide LED on (0a 20 seq 03 00 01 14)
+   4.043 OUT   7: 0a 20 01 03 00 01 14
+   4.544 --- got_announce=1 got_input=1; decoding until t=10 s. Press buttons now.
+  10.134 done. got_announce=1 got_input=1
