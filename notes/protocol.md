@@ -118,7 +118,7 @@ The driver turns each GIP input packet into HID input report 1, 15 bytes with th
 | 1..4 | Generic Desktop X, Y | Left thumbstick |
 | 5..8 | Generic Desktop Z, Rz | Right thumbstick |
 | 9..12 | Button 7, Button 8 (0..1023) | Left trigger, right trigger (analog) |
-| 13 bits 0..3 | Generic Desktop DPad Up, Down, Left, Right | Direction pad |
+| 13 bits 0..3 | Generic Desktop DPad Up (0x90), Down (0x91), Right (0x92), Left (0x93) | Direction pad |
 | 13 bits 4..7 | Button 1..4 | A, B, X, Y |
 | 14 bits 0..1 | Button 5, 6 | L1, R1 |
 | 14 bits 2..3 | Button 9, 10 | Left and right thumbstick buttons |
@@ -136,3 +136,4 @@ Probe results that shaped this (`captures/2026-10-12-*-probe.txt`):
 - Record (0xB2) arrives as Share.
 - Consumer Menu, AC Back, AC Search, Menu Pick, Menu Escape, AL Control Panel, AC Stop, AC Desktop Show All Windows, and Generic Desktop System Main Menu and System App Menu arrive as nothing.
 - A report shorter than the descriptor declares is dropped silently. Keep report 1 at exactly 112 data bits.
+- Axis signs (verified 2026-10-12 in the app's preview): the framework reports the HID Y axis as is, so the driver passes GIP Y through unchanged and up is positive. 0x92 is DPad Right and 0x93 is DPad Left in the HID usage table.

@@ -70,8 +70,8 @@ static const uint8_t kReportDescriptor[] = {
     0x05, 0x01,                   //   Usage Page (Generic Desktop)
     0x09, 0x90,                   //   Usage (DPad Up)
     0x09, 0x91,                   //   Usage (DPad Down)
-    0x09, 0x92,                   //   Usage (DPad Left)
-    0x09, 0x93,                   //   Usage (DPad Right)
+    0x09, 0x92,                   //   Usage (DPad Right)  0x92 is Right in the HID usage table
+    0x09, 0x93,                   //   Usage (DPad Left)   0x93 is Left
     0x15, 0x00,                   //   Logical Minimum (0)
     0x25, 0x01,                   //   Logical Maximum (1)
     0x75, 0x01,                   //   Report Size (1)
@@ -315,22 +315,24 @@ OSData *MacgipGamepad::newReportDescriptor(void)
 static void put16(uint8_t *p, uint16_t v) { p[0] = static_cast<uint8_t>(v); p[1] = static_cast<uint8_t>(v >> 8); }
 
 // Build the HID input report from the parsed GIP input and the cached guide state.
-// Layout: [0] report ID, [1..8] X Y Z Rz, [9..12] L2 R2, [13] dpad bits 0..3 then buttons 1..4,
+// Layout: [0] report ID, [1..8] X Y Z Rz, [9..12] L2 R2, [13] dpad up down right left then buttons 1..4,
 // [14] buttons 5 6 9 10, AC Exit, AC Properties, AC Home, pad.
 static void buildReport(uint8_t *r, const gip_input *in, bool guide)
 {
     r[0] = kInputReportID;
     put16(r + 1, static_cast<uint16_t>(in->left_x + 32768));
-    put16(r + 3, static_cast<uint16_t>(32767 - in->left_y));    // HID Y grows downward
+    // Y is passed through unchanged. The Game Controller framework reports a HID Y axis as is,
+    // so up stays positive; flipping it here made up read as -1 (verified 2026-10-12).
+    put16(r + 3, static_cast<uint16_t>(in->left_y + 32768));
     put16(r + 5, static_cast<uint16_t>(in->right_x + 32768));
-    put16(r + 7, static_cast<uint16_t>(32767 - in->right_y));
+    put16(r + 7, static_cast<uint16_t>(in->right_y + 32768));
     put16(r + 9, in->left_trigger);
     put16(r + 11, in->right_trigger);
     uint8_t b13 = 0, b14 = 0;
     if (in->buttons & GIP_BTN_DPAD_UP) b13 |= 1u << 0;
     if (in->buttons & GIP_BTN_DPAD_DOWN) b13 |= 1u << 1;
-    if (in->buttons & GIP_BTN_DPAD_LEFT) b13 |= 1u << 2;
-    if (in->buttons & GIP_BTN_DPAD_RIGHT) b13 |= 1u << 3;
+    if (in->buttons & GIP_BTN_DPAD_RIGHT) b13 |= 1u << 2;   // DPad Right (0x92)
+    if (in->buttons & GIP_BTN_DPAD_LEFT) b13 |= 1u << 3;    // DPad Left (0x93)
     if (in->buttons & GIP_BTN_A) b13 |= 1u << 4;
     if (in->buttons & GIP_BTN_B) b13 |= 1u << 5;
     if (in->buttons & GIP_BTN_X) b13 |= 1u << 6;
