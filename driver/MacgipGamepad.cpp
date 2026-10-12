@@ -89,16 +89,19 @@ static const uint8_t kReportDescriptor[] = {
     0x29, 0x0A,                   //   Usage Maximum (10)  LS RS
     0x95, 0x02,                   //   Report Count (2)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
-    0x19, 0x0D,                   //   Usage Minimum (13)
-    0x29, 0x0F,                   //   Usage Maximum (15)  menu view guide (IOHIDEventDriver "m1..m3")
+    0x05, 0x0C,                   //   Usage Page (Consumer)
+    0x09, 0x40,                   //   Usage (Menu) menu button
+    0x0A, 0x24, 0x02,             //   Usage (AC Back) view button
+    0x0A, 0x23, 0x02,             //   Usage (AC Home) guide button
     0x95, 0x03,                   //   Report Count (3)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
-    0x05, 0x0C,                   //   Usage Page (Consumer)
-    0x0A, 0x23, 0x02,             //   Usage (AC Home) present for classification, always 0
+    0x75, 0x01,                   //   Report Size (1)
     0x95, 0x01,                   //   Report Count (1)
-    0x81, 0x02,                   //   Input (Data, Var, Abs)
+    0x81, 0x03,                   //   Input (Const) padding
     // Input report 1 is exactly 112 data bits (14 bytes). Keep it byte aligned: a report that is
     // shorter than the descriptor says is dropped by IOHIDFamily without any log line.
+    // Button usages 11..16 reach the Game Controller framework as L4, R4 and M1..M4, not as
+    // menu, options and home. Consumer keys do: AC Home arrived as the Menu button in testing.
     0x06, 0x00, 0xFF,             //   Usage Page (Vendor 0xFF00)
     0x85, kRumbleReportID,        //   Report ID (2)
     0x09, 0x01,                   //   Usage (1)
@@ -309,7 +312,7 @@ static void put16(uint8_t *p, uint16_t v) { p[0] = static_cast<uint8_t>(v); p[1]
 
 // Build the HID input report from the parsed GIP input and the cached guide state.
 // Layout: [0] report ID, [1..8] X Y Z Rz, [9..12] L2 R2, [13] dpad bits 0..3 then buttons 1..4,
-// [14] buttons 5 6 9 10 13 14 15, AC Home (always 0), pad.
+// [14] buttons 5 6 9 10, Consumer Menu, AC Back, AC Home, pad.
 static void buildReport(uint8_t *r, const gip_input *in, bool guide)
 {
     r[0] = kInputReportID;
@@ -332,9 +335,9 @@ static void buildReport(uint8_t *r, const gip_input *in, bool guide)
     if (in->buttons & GIP_BTN_RB) b14 |= 1u << 1;
     if (in->buttons & GIP_BTN_LS) b14 |= 1u << 2;
     if (in->buttons & GIP_BTN_RS) b14 |= 1u << 3;
-    if (in->buttons & GIP_BTN_MENU) b14 |= 1u << 4;   // Button 13
-    if (in->buttons & GIP_BTN_VIEW) b14 |= 1u << 5;   // Button 14
-    if (guide) b14 |= 1u << 6;                         // Button 15; bit 7 (AC Home) stays 0
+    if (in->buttons & GIP_BTN_MENU) b14 |= 1u << 4;   // Consumer Menu
+    if (in->buttons & GIP_BTN_VIEW) b14 |= 1u << 5;   // Consumer AC Back
+    if (guide) b14 |= 1u << 6;                         // Consumer AC Home
     r[13] = b13;
     r[14] = b14;
 }
