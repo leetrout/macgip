@@ -25,7 +25,7 @@ static const uint8_t kEndpointOut = 0x02;
 static const uint32_t kPacketSize = 64;
 static const uint8_t kInputReportID = 1;
 static const uint8_t kRumbleReportID = 2;
-static const uint32_t kInputReportSize = 15;   // report ID + 14 data bytes
+static const uint32_t kInputReportSize = 16;   // PROBE BUILD: report ID + 15 data bytes
 static const uint8_t kGuideLEDBrightness = 0x14;
 
 // HID report descriptor. Own layout, not copied from any vendor's descriptor. It follows what
@@ -89,14 +89,22 @@ static const uint8_t kReportDescriptor[] = {
     0x29, 0x0A,                   //   Usage Maximum (10)  LS RS
     0x95, 0x02,                   //   Report Count (2)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
+    // PROBE BUILD: seven candidate usages for menu, options and home, one per physical button.
     0x05, 0x0C,                   //   Usage Page (Consumer)
-    0x09, 0x40,                   //   Usage (Menu) menu button
-    0x0A, 0x24, 0x02,             //   Usage (AC Back) view button
-    0x0A, 0x23, 0x02,             //   Usage (AC Home) guide button
-    0x95, 0x03,                   //   Report Count (3)
+    0x0A, 0x04, 0x02,             //   AC Exit        <- menu  (known: Menu)
+    0x0A, 0x24, 0x02,             //   AC Back        <- view
+    0x0A, 0x23, 0x02,             //   AC Home        <- guide (Menu when alone; Home now?)
+    0x0A, 0x09, 0x02,             //   AC Properties  <- left stick click
+    0x0A, 0x9F, 0x01,             //   AL Control Panel <- right stick click
+    0x0A, 0x26, 0x02,             //   AC Stop        <- LB
+    0x0A, 0xA2, 0x02,             //   AC Desktop Show All Windows <- RB
+    0x95, 0x07,                   //   Report Count (7)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
     0x75, 0x01,                   //   Report Size (1)
     0x95, 0x01,                   //   Report Count (1)
+    0x81, 0x03,                   //   Input (Const) padding to byte
+    0x75, 0x01,                   //   Report Size (1)
+    0x95, 0x04,                   //   Report Count (4)
     0x81, 0x03,                   //   Input (Const) padding
     // Input report 1 is exactly 112 data bits (14 bytes). Keep it byte aligned: a report that is
     // shorter than the descriptor says is dropped by IOHIDFamily without any log line.
@@ -331,15 +339,18 @@ static void buildReport(uint8_t *r, const gip_input *in, bool guide)
     if (in->buttons & GIP_BTN_B) b13 |= 1u << 5;
     if (in->buttons & GIP_BTN_X) b13 |= 1u << 6;
     if (in->buttons & GIP_BTN_Y) b13 |= 1u << 7;
-    if (in->buttons & GIP_BTN_LB) b14 |= 1u << 0;
-    if (in->buttons & GIP_BTN_RB) b14 |= 1u << 1;
-    if (in->buttons & GIP_BTN_LS) b14 |= 1u << 2;
-    if (in->buttons & GIP_BTN_RS) b14 |= 1u << 3;
-    if (in->buttons & GIP_BTN_MENU) b14 |= 1u << 4;   // Consumer Menu
-    if (in->buttons & GIP_BTN_VIEW) b14 |= 1u << 5;   // Consumer AC Back
-    if (guide) b14 |= 1u << 6;                         // Consumer AC Home
+    // PROBE BUILD: LB, RB, stick clicks, menu, view and guide drive candidate usages instead.
+    uint8_t b15 = 0;
+    if (in->buttons & GIP_BTN_MENU) b14 |= 1u << 4;   // AC Exit
+    if (in->buttons & GIP_BTN_VIEW) b14 |= 1u << 5;   // AC Back
+    if (guide) b14 |= 1u << 6;                         // AC Home
+    if (in->buttons & GIP_BTN_LS) b14 |= 1u << 7;     // AC Properties
+    if (in->buttons & GIP_BTN_RS) b15 |= 1u << 0;     // AL Control Panel
+    if (in->buttons & GIP_BTN_LB) b15 |= 1u << 1;     // AC Stop
+    if (in->buttons & GIP_BTN_RB) b15 |= 1u << 2;     // AC Desktop Show All Windows
     r[13] = b13;
     r[14] = b14;
+    r[15] = b15;
 }
 
 void IMPL(MacgipGamepad, ReadComplete)

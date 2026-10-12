@@ -108,3 +108,31 @@ During the 5 minute hold (run 5) the pad sent a status packet about every 20 s w
 
 - The PowerA rumble packets from xpad (`09 00 ...`) on this unit. SDL's rumble call on 2026-10-11 made the motors run (owner confirmed), so SDL's rumble packet for Xbox One controllers works on this unit. The xpad PowerA packets themselves are untested.
 - Behaviour after unplug and replug, and after sleep.
+
+## HID report layout the driver publishes (verified 2026-10-12)
+
+The driver turns each GIP input packet into HID input report 1, 15 bytes with the report ID. The layout follows what IOHIDFamily's `IOHIDEventDriver::checkGameControllerElement` needs to classify an extended game controller, plus the three Consumer keys that gamecontrollerd maps to the system buttons.
+
+| Bytes | Usage | Game Controller framework element |
+|---|---|---|
+| 1..4 | Generic Desktop X, Y | Left thumbstick |
+| 5..8 | Generic Desktop Z, Rz | Right thumbstick |
+| 9..12 | Button 7, Button 8 (0..1023) | Left trigger, right trigger (analog) |
+| 13 bits 0..3 | Generic Desktop DPad Up, Down, Left, Right | Direction pad |
+| 13 bits 4..7 | Button 1..4 | A, B, X, Y |
+| 14 bits 0..1 | Button 5, 6 | L1, R1 |
+| 14 bits 2..3 | Button 9, 10 | Left and right thumbstick buttons |
+| 14 bit 4 | Consumer AC Exit (0x204) | Menu |
+| 14 bit 5 | Consumer AL Control Panel (0x19F) | Options |
+| 14 bit 6 | Consumer AC Home (0x223) | Home. macOS handles it and opens the Games app. |
+
+Output report 2 is 4 bytes: left trigger, right trigger, low and high motor strength, 0..100.
+
+Probe results that shaped this (`captures/2026-10-12-*-probe.txt`):
+
+- A hat switch and Simulation Accelerator/Brake do not count for classification. The device was a HID gamepad for IOHIDManager clients but invisible to `GCController`.
+- Button 11 and 12 arrive as L4 and R4. Button 13..15 arrive as M1..M3.
+- AC Home alone arrives as Menu. With AC Exit present, AC Exit is Menu and AC Home becomes Home.
+- Record (0xB2) arrives as Share.
+- Consumer Menu, AC Back, AC Search, Menu Pick, Menu Escape, AC Properties, AC Stop, AC Desktop Show All Windows, and Generic Desktop System Main Menu and System App Menu arrive as nothing.
+- A report shorter than the descriptor declares is dropped silently. Keep report 1 at exactly 112 data bits.

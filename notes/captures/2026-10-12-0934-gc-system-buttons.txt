@@ -1,0 +1,18 @@
+controllers at start: 0
+controller: Wired Controller (compatible with Xbox) via macgip category=MFi extended=true micro=true
+  dpad Left Thumbstick = (0.045822144, 0.00920105)
+  button A Button = 1.0
+  dpad Right Thumbstick = (-0.0008239746, 0.006668091)
+  button A Button = 0.0
+  button A Button = 1.0
+  button A Button = 0.0
+  dpad Right Thumbstick = (-0.0154418945, 0.006668091)
+  dpad Right Thumbstick = (-0.030059814, 0.006668091)
+  dpad Right Thumbstick = (-0.046295166, 0.006668091)
+  dpad Right Thumbstick = (-0.057647705, 0.006668091)
+  dpad Right Thumbstick = (-0.04385376, 0.006668091)
+  dpad Right Thumbstick = (-0.033294678, 0.006668091)
+  button Menu Button = 1.0
+  button Menu Button = 0.0
+  button Menu Button = 1.0
+  button Menu Button = 0.0
