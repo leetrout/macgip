@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var manager = ExtensionManager()
+    @StateObject private var monitor = ControllerMonitor()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -14,6 +15,9 @@ struct ContentView: View {
                 Button("Uninstall driver") { manager.uninstall() }.disabled(manager.busy)
             }
             Text(manager.status).font(.callout).textSelection(.enabled)
+            Divider()
+            Text("Game Controller framework: \(monitor.name)").font(.headline)
+            ForEach(monitor.lines, id: \.self) { Text($0).font(.system(.body, design: .monospaced)) }
             Spacer()
             Text("Xbox is a trademark of the Microsoft group of companies. PowerA is a trademark of its owner. This app is not affiliated with either.")
                 .font(.footnote).foregroundStyle(.secondary)

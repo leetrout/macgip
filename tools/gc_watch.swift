@@ -2,6 +2,7 @@
 import Foundation
 import GameController
 
+setvbuf(stdout, nil, _IOLBF, 0)   // line-buffered so a killed run keeps its output
 let secs = CommandLine.arguments.count > 1 ? Double(CommandLine.arguments[1]) ?? 20 : 20
 var seen = 0
 func attach(_ c: GCController) {
@@ -17,6 +18,7 @@ func attach(_ c: GCController) {
 NotificationCenter.default.addObserver(forName: .GCControllerDidConnect, object: nil, queue: .main) { n in
     if let c = n.object as? GCController { attach(c) }
 }
+GCController.shouldMonitorBackgroundEvents = true   // a command-line tool is never frontmost
 GCController.controllers().forEach(attach)
 print("controllers at start: \(GCController.controllers().count)")
 RunLoop.main.run(until: Date(timeIntervalSinceNow: secs))

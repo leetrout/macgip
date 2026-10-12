@@ -17,16 +17,33 @@ such as the USB product string, are reproduced verbatim as technical data.
 MIT. See `LICENSE`. Protocol facts were learned from the Linux `xpad` and `xone` drivers
 (GPL-2.0) and from SDL (zlib). No code was copied from any of them.
 
-Status 2026-10-11: Phase 2 of `notes/` is done. The pad speaks GIP, nothing in macOS claims it, and a userspace libusb probe gets input reports after one power-on packet. The architecture choice waits for the owner. Read `notes/architecture.md` first.
+Status 2026-10-11: the DriverKit extension works on the author's Mac with SIP on. It matches the pad, runs the GIP init, and publishes a HID gamepad that the Game Controller framework reports as an extended gamepad. Rumble, hot-plug, sleep and wake, and distribution signing are still open; see the issues. Read `notes/architecture.md` first.
 
 ## Layout
 
 ```
+project.yml       XcodeGen spec for the Xcode project (mise run xcodeproj)
+app/              the macgip host app: installs and removes the driver extension
+driver/           the DriverKit extension: MacgipUSBDevice (configures the USB device) and
+                  MacgipGamepad (GIP interface 0 as a HID gamepad)
+gip/              protocol core in plain C with tests (mise run test)
 notes/            findings: environment.md, device.md, protocol.md, disconnect.md, architecture.md, entitlements.md,
                   and handoff-2026-10-11.md (the original brief)
 notes/captures/   raw descriptors, probe logs, test results
-tools/            small programs used during investigation
+tools/            small programs used during investigation and verification
 ```
+
+## Build and install the driver (development)
+
+Needs Xcode, a paid Apple Developer account, and the setup in `notes/entitlements.md`: two App IDs, the development DriverKit capabilities, and a DriverKit development provisioning profile for the driver on this Mac.
+
+```bash
+mise run stage
+```
+
+That generates the project, builds the app and the driver with a fresh version stamp, copies the app to `/Applications`, and opens it. Click Install driver, approve the extension in System Settings, then plug the controller in. The guide LED lights when the driver has started. Before installing a new build, unplug the controller first so the old driver instance stops cleanly.
+
+Uninstall: click Uninstall driver in the app, or remove the extension under System Settings > General > Login Items & Extensions > Driver Extensions.
 
 ## Tools
 

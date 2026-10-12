@@ -5,7 +5,7 @@ struct MacgipApp: App {
     var body: some Scene {
         WindowGroup("macgip") {
             ContentView()
-                .frame(minWidth: 420, minHeight: 260)
+                .frame(minWidth: 520, minHeight: 420)
         }
         .windowResizability(.contentSize)
     }

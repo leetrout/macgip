@@ -37,9 +37,21 @@ Tested 2026-10-11. Result: not possible on this machine without an Apple-granted
 
 So Option A only works if the owner has, or wants, a paid developer account and Apple grants the entitlement. If granted, Option A keeps SIP on and has the fastest build-run loop.
 
-## Option B: DriverKit extension
+## Option B: DriverKit extension (built, working on 2026-10-11)
 
-Not tested yet. Facts from Apple docs and thrustmacos:
+Built in `driver/` and `app/`, project generated from `project.yml`. On 2026-10-11 the extension loaded with SIP on, using the self-service development entitlements and the "macgip driver dev" profile, matched the pad, started GIP, and published a HID gamepad that the Game Controller framework reports as an extended gamepad. The exact fixes it took are listed on issue #9.
+
+Facts that shaped it:
+
+- Two personalities, like Apple's own driver. `MacgipUSBDevice` on `IOUSBHostDevice` selects configuration 1, because macOS leaves a vendor-class device unconfigured and interfaces only exist after that. `MacgipGamepad` on `IOUSBHostInterface` (matched by idVendor, idProduct, bConfigurationValue 1, bInterfaceNumber 0) is an `IOUserHIDDevice`.
+- `CFBundleIdentifierKernel` for the `AppleUserHIDDevice` personality is `com.apple.iokit.IOHIDFamily`. With `com.apple.kpi.iokit` the personality never matched.
+- The driver's `CFBundleVersion` must be a kext-style version. Every build stamps `1.<day of year>.<HHMM>` so macOS replaces the installed copy.
+- The signed `com.apple.developer.driverkit.transport.usb` value must equal what the profile grants. The development profile grants `idVendor` `*`, so the dext is signed with `*` until Apple grants a scoped distribution entitlement.
+- Interrupt pipes take no completion timeout. Stop must abort asynchronously; a synchronous abort on the driver's own queue hung an upgrade and needed a root kill of the old process.
+- `RegisterService()` after `handleStart`, or IOHIDFamily never matches an interface and event driver on the device.
+- The Game Controller framework classifies a HID device through IOHIDFamily's `IOHIDEventDriver::checkGameControllerElement`: sticks on Generic Desktop X, Y, Z, Rz; triggers on Button 7 and 8; d-pad on Generic Desktop DPad Up, Down, Left, Right (a hat switch does not count); face buttons on Button 1 to 4; shoulders on Button 5 and 6; stick clicks on Button 9 and 10. With Simulation Accelerator/Brake and a hat switch the device was a HID gamepad for IOHIDManager clients but invisible to `GCController`.
+
+Earlier notes, before the build:
 
 - A dext built on USBDriverKit can match `idVendor=0x20d6, idProduct=0x2007` on `IOUSBHostInterface` and subclass `IOUserHIDDevice`. That is exactly how Apple's own `XboxGamepad.dext` is structured (`IOClass=AppleUserHIDDevice` on the `FF/47/D0` interface). No "virtual" device is needed. The dext is the HID device for that USB interface.
 - Entitlements: `com.apple.developer.driverkit`, `com.apple.developer.driverkit.transport.usb`, `com.apple.developer.driverkit.family.hid.device`. All are restricted.
