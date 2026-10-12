@@ -135,6 +135,7 @@ struct MacgipGamepad_IVars {
     uint8_t rumble[4];
     bool guidePressed;
     bool stopping;
+    bool interfaceOpen;
 };
 
 bool MacgipGamepad::init()
@@ -179,6 +180,24 @@ static kern_return_t writeSync(MacgipGamepad_IVars *iv, size_t length)
     return iv->outPipe->IO(iv->outBuffer, static_cast<uint32_t>(length), &sent, 0);
 }
 
+// Abort pending transfers asynchronously and close the interface. Safe to call more than once.
+// The abort must not be synchronous: completions arrive on this driver's queue, so a blocking
+// abort from Stop would wait on itself.
+static void teardown(MacgipGamepad *self, MacgipGamepad_IVars *iv)
+{
+    iv->stopping = true;
+    if (iv->inPipe) {
+        iv->inPipe->Abort(0, kIOReturnAborted, self);
+    }
+    if (iv->outPipe) {
+        iv->outPipe->Abort(0, kIOReturnAborted, self);
+    }
+    if (iv->interface && iv->interfaceOpen) {
+        iv->interface->Close(self, 0);
+        iv->interfaceOpen = false;
+    }
+}
+
 bool MacgipGamepad::handleStart(IOService *provider)
 {
     kern_return_t ret;
@@ -196,20 +215,24 @@ bool MacgipGamepad::handleStart(IOService *provider)
         LOG("interface Open failed: 0x%x", ret);
         return false;
     }
+    iv->interfaceOpen = true;
     ret = iv->interface->CopyPipe(kEndpointIn, &iv->inPipe);
     if (ret != kIOReturnSuccess) {
         LOG("CopyPipe IN failed: 0x%x", ret);
+        teardown(this, iv);
         return false;
     }
     ret = iv->interface->CopyPipe(kEndpointOut, &iv->outPipe);
     if (ret != kIOReturnSuccess) {
         LOG("CopyPipe OUT failed: 0x%x", ret);
+        teardown(this, iv);
         return false;
     }
     if (IOBufferMemoryDescriptor::Create(kIOMemoryDirectionIn, kPacketSize, 0, &iv->inBuffer) != kIOReturnSuccess ||
         IOBufferMemoryDescriptor::Create(kIOMemoryDirectionOut, kPacketSize, 0, &iv->outBuffer) != kIOReturnSuccess ||
         IOBufferMemoryDescriptor::Create(kIOMemoryDirectionOut, kInputReportSize, 0, &iv->reportBuffer) != kIOReturnSuccess) {
         LOG("buffer allocation failed");
+        teardown(this, iv);
         return false;
     }
     iv->inBytes = bufferBytes(iv->inBuffer);
@@ -217,6 +240,7 @@ bool MacgipGamepad::handleStart(IOService *provider)
     iv->reportBytes = bufferBytes(iv->reportBuffer);
     if (!iv->inBytes || !iv->outBytes || !iv->reportBytes) {
         LOG("buffer mapping failed");
+        teardown(this, iv);
         return false;
     }
     iv->inBuffer->SetLength(kPacketSize);
@@ -225,6 +249,7 @@ bool MacgipGamepad::handleStart(IOService *provider)
     if (CreateActionReadComplete(0, &iv->readAction) != kIOReturnSuccess ||
         CreateActionWriteComplete(0, &iv->writeAction) != kIOReturnSuccess) {
         LOG("action creation failed");
+        teardown(this, iv);
         return false;
     }
 
@@ -234,6 +259,7 @@ bool MacgipGamepad::handleStart(IOService *provider)
     ret = writeSync(iv, n);
     if (ret != kIOReturnSuccess) {
         LOG("power-on write failed: 0x%x", ret);
+        teardown(this, iv);
         return false;
     }
     n = gip_encode_led(&iv->encoder, iv->outBytes, kGuideLEDBrightness);
@@ -246,6 +272,7 @@ bool MacgipGamepad::handleStart(IOService *provider)
     ret = iv->inPipe->AsyncIO(iv->inBuffer, kPacketSize, iv->readAction, 0);
     if (ret != kIOReturnSuccess) {
         LOG("first AsyncIO failed: 0x%x", ret);
+        teardown(this, iv);
         return false;
     }
     LOG("started");
@@ -254,17 +281,7 @@ bool MacgipGamepad::handleStart(IOService *provider)
 
 kern_return_t IMPL(MacgipGamepad, Stop)
 {
-    MacgipGamepad_IVars *iv = ivars;
-    iv->stopping = true;
-    if (iv->inPipe) {
-        iv->inPipe->Abort(kIOUSBAbortSynchronous, kIOReturnAborted, nullptr);
-    }
-    if (iv->outPipe) {
-        iv->outPipe->Abort(kIOUSBAbortSynchronous, kIOReturnAborted, nullptr);
-    }
-    if (iv->interface) {
-        iv->interface->Close(this, 0);
-    }
+    teardown(this, ivars);
     LOG("stopped");
     return Stop(provider, SUPERDISPATCH);
 }
