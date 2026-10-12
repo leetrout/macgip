@@ -90,14 +90,14 @@ static const uint8_t kReportDescriptor[] = {
     0x95, 0x02,                   //   Report Count (2)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
     // The three system buttons are Consumer page keys. Found by probing on 2026-10-12, see
-    // notes/protocol.md: AC Exit is the Menu button, AL Control Panel is the Options button,
+    // notes/protocol.md: AC Exit is the Menu button, AC Properties is the Options button,
     // and AC Home is the Home button, which macOS itself handles (it opens the Games app).
     // Button usages 11..16 arrive as L4, R4 and M1..M4 instead, and Consumer Menu, AC Back,
-    // AC Search, Menu Pick, Menu Escape, AC Properties, AC Stop and the System Menu usages map
+    // AC Search, Menu Pick, Menu Escape, AL Control Panel, AC Stop and the System Menu usages map
     // to nothing. Record (0xB2) arrives as the Share button; this pad has no share button.
     0x05, 0x0C,                   //   Usage Page (Consumer)
     0x0A, 0x04, 0x02,             //   Usage (AC Exit) menu button
-    0x0A, 0x9F, 0x01,             //   Usage (AL Control Panel) view button
+    0x0A, 0x09, 0x02,             //   Usage (AC Properties) view button
     0x0A, 0x23, 0x02,             //   Usage (AC Home) guide button
     0x95, 0x03,                   //   Report Count (3)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
@@ -316,7 +316,7 @@ static void put16(uint8_t *p, uint16_t v) { p[0] = static_cast<uint8_t>(v); p[1]
 
 // Build the HID input report from the parsed GIP input and the cached guide state.
 // Layout: [0] report ID, [1..8] X Y Z Rz, [9..12] L2 R2, [13] dpad bits 0..3 then buttons 1..4,
-// [14] buttons 5 6 9 10, AC Exit, AL Control Panel, AC Home, pad.
+// [14] buttons 5 6 9 10, AC Exit, AC Properties, AC Home, pad.
 static void buildReport(uint8_t *r, const gip_input *in, bool guide)
 {
     r[0] = kInputReportID;
@@ -340,7 +340,7 @@ static void buildReport(uint8_t *r, const gip_input *in, bool guide)
     if (in->buttons & GIP_BTN_LS) b14 |= 1u << 2;
     if (in->buttons & GIP_BTN_RS) b14 |= 1u << 3;
     if (in->buttons & GIP_BTN_MENU) b14 |= 1u << 4;   // AC Exit: Menu
-    if (in->buttons & GIP_BTN_VIEW) b14 |= 1u << 5;   // AL Control Panel: Options
+    if (in->buttons & GIP_BTN_VIEW) b14 |= 1u << 5;   // AC Properties: Options
     if (guide) b14 |= 1u << 6;                         // AC Home: Home
     r[13] = b13;
     r[14] = b14;

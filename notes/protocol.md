@@ -123,7 +123,7 @@ The driver turns each GIP input packet into HID input report 1, 15 bytes with th
 | 14 bits 0..1 | Button 5, 6 | L1, R1 |
 | 14 bits 2..3 | Button 9, 10 | Left and right thumbstick buttons |
 | 14 bit 4 | Consumer AC Exit (0x204) | Menu |
-| 14 bit 5 | Consumer AL Control Panel (0x19F) | Options |
+| 14 bit 5 | Consumer AC Properties (0x209) | Options |
 | 14 bit 6 | Consumer AC Home (0x223) | Home. macOS handles it and opens the Games app. |
 
 Output report 2 is 4 bytes: left trigger, right trigger, low and high motor strength, 0..100.
@@ -134,5 +134,5 @@ Probe results that shaped this (`captures/2026-10-12-*-probe.txt`):
 - Button 11 and 12 arrive as L4 and R4. Button 13..15 arrive as M1..M3.
 - AC Home alone arrives as Menu. With AC Exit present, AC Exit is Menu and AC Home becomes Home.
 - Record (0xB2) arrives as Share.
-- Consumer Menu, AC Back, AC Search, Menu Pick, Menu Escape, AC Properties, AC Stop, AC Desktop Show All Windows, and Generic Desktop System Main Menu and System App Menu arrive as nothing.
+- Consumer Menu, AC Back, AC Search, Menu Pick, Menu Escape, AL Control Panel, AC Stop, AC Desktop Show All Windows, and Generic Desktop System Main Menu and System App Menu arrive as nothing.
 - A report shorter than the descriptor declares is dropped silently. Keep report 1 at exactly 112 data bits.
