@@ -1,0 +1,16 @@
+// Device-level driver. Matches the USB device and selects configuration 1 so that the
+// interfaces are published and MacgipGamepad can match interface 0.
+#ifndef MacgipUSBDevice_h
+#define MacgipUSBDevice_h
+
+#include <Availability.h>
+#include <DriverKit/IOService.iig>
+
+class MacgipUSBDevice : public IOService
+{
+public:
+    virtual kern_return_t Start(IOService *provider) override;
+    virtual kern_return_t Stop(IOService *provider) override;
+};
+
+#endif

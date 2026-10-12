@@ -1,0 +1,2 @@
+IOHIDManagerOpen: 0x0
+matched device: Wired Controller (compatible with Xbox) via macgip

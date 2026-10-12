@@ -1,0 +1,129 @@
+# XcodeGen spec. Regenerate the Xcode project with `mise run xcodeproj`.
+name: macgip
+options:
+  bundleIdPrefix: com.leetrout
+  deploymentTarget:
+    macOS: "15.0"
+  generateEmptyDirectories: false
+  groupSortPosition: top
+settings:
+  base:
+    DEVELOPMENT_TEAM: PJ68SLPTTB
+    # Overridden per build by `mise run build-driver` (1.<day of year>.<HHMM>) so macOS replaces
+    # the installed extension. A driver version must be a kext version: up to three integers.
+    CURRENT_PROJECT_VERSION: "1.0.0"
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "15.0"
+targets:
+  macgip:
+    type: application
+    platform: macOS
+    sources:
+      - path: app
+        excludes: ["Info.plist", "*.entitlements"]
+    info:
+      path: app/Info.plist
+      properties:
+        CFBundleDisplayName: macgip
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSMinimumSystemVersion: "15.0"
+        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."
+        LSApplicationCategoryType: public.app-category.utilities
+    entitlements:
+      path: app/macgip.entitlements
+      properties:
+        com.apple.developer.system-extension.install: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.leetrout.macgip
+        PRODUCT_NAME: macgip
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - target: macgipDriver
+        embed: true
+        codeSign: true
+  macgipDriver:
+    type: driver-extension
+    platform: macOS
+    sources:
+      - path: driver
+        excludes: ["Info.plist", "*.entitlements"]
+      - path: gip/gip.c
+      - path: gip/gip.h
+    info:
+      path: driver/Info.plist
+      properties:
+        CFBundlePackageType: DEXT
+        CFBundleDisplayName: macgip driver
+        CFBundleShortVersionString: "0.1"
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        OSBundleUsageDescription: "Driver for wired GIP gamepads compatible with Xbox controllers that macOS does not support."
+        OSMinimumDriverKitVersion: "24.0"
+        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."
+        IOKitPersonalities:
+          # Device level: select configuration 1. macOS leaves this vendor-class device unconfigured.
+          macgipUSBDevice:
+            CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleIdentifierKernel: com.apple.kpi.iokit
+            IOClass: IOUserService
+            IOUserClass: MacgipUSBDevice
+            IOProviderClass: IOUSBHostDevice
+            IOUserServerName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            IOMatchCategory: $(PRODUCT_BUNDLE_IDENTIFIER)
+            idVendor: 8406
+            idProduct: 8199
+            bDeviceClass: 255
+          # Interface level: the GIP control interface becomes a HID gamepad.
+          macgipGamepad:
+            CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+            # AppleUserHIDDevice lives in IOHIDFamily. Apple's AppleUserHIDDrivers.dext names it this way.
+            CFBundleIdentifierKernel: com.apple.iokit.IOHIDFamily
+            IOClass: AppleUserHIDDevice
+            IOUserClass: MacgipGamepad
+            IOProviderClass: IOUSBHostInterface
+            IOUserServerName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            # IOUSBHostInterface accepts only fixed key combinations. This is the documented
+            # "idVendor + idProduct + bConfigurationValue + bInterfaceNumber" combination.
+            idVendor: 8406
+            idProduct: 8199
+            bConfigurationValue: 1
+            bInterfaceNumber: 0
+    entitlements:
+      path: driver/macgipDriver.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.developer.driverkit: true
+        com.apple.developer.driverkit.family.hid.device: true
+        # The development profile grants idVendor "*". The signed value must match it exactly,
+        # or AMFI refuses to launch the driver. Scope this to 8406 once Apple grants the
+        # distribution entitlement with a real vendor list.
+        com.apple.developer.driverkit.transport.usb:
+          - idVendor: "*"
+    dependencies:
+      - sdk: DriverKit.framework
+      - sdk: USBDriverKit.framework
+      - sdk: HIDDriverKit.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.leetrout.macgip.driver
+        PRODUCT_NAME: com.leetrout.macgip.driver
+        SDKROOT: driverkit
+        DRIVERKIT_DEPLOYMENT_TARGET: "24.0"
+        ARCHS: arm64e
+        VALID_ARCHS: arm64e
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "Apple Development"
+        PROVISIONING_PROFILE_SPECIFIER: "macgip driver dev"
+        GENERATE_INFOPLIST_FILE: NO
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/gip"
+        CLANG_CXX_LANGUAGE_STANDARD: c++17
+        GCC_C_LANGUAGE_STANDARD: c11
+schemes:
+  macgip:
+    build:
+      targets:
+        macgip: all
+        macgipDriver: all

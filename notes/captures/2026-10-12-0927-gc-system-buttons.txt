@@ -1,0 +1,2 @@
+controllers at start: 0
+controller: Wired Controller (compatible with Xbox) via macgip category=MFi extended=true micro=true
