@@ -275,6 +275,8 @@ bool MacgipGamepad::handleStart(IOService *provider)
         teardown(this, iv);
         return false;
     }
+    // Announce the HID device so IOHIDInterface and the event driver match on top of it.
+    RegisterService();
     LOG("started");
     return true;
 }
