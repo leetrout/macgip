@@ -1,0 +1,13 @@
+Unknown command: monitor
+
+Usage:
+
+  hidutil [command]
+
+Available commands:
+  help       - print this help message
+  dump       - dump HID Event System state
+  property   - read/write HID Event System property
+  list       - list HID Event System services and devices
+
+Use "hidutil [command] --help" for more information about a command.

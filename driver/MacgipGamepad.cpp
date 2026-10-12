@@ -25,13 +25,15 @@ static const uint8_t kEndpointOut = 0x02;
 static const uint32_t kPacketSize = 64;
 static const uint8_t kInputReportID = 1;
 static const uint8_t kRumbleReportID = 2;
-static const uint32_t kInputReportSize = 16;   // report ID + 15 data bytes
+static const uint32_t kInputReportSize = 15;   // report ID + 14 data bytes
 static const uint8_t kGuideLEDBrightness = 0x14;
 
-// HID report descriptor. Own layout, not copied from any vendor's descriptor. Axes and triggers
-// use the usages the Game Controller framework expects for a gamepad: X/Y and Z/Rz for the
-// sticks, Brake/Accelerator for the triggers, a hat switch for the d-pad, 10 buttons, and
-// Consumer AC Home for the guide button. Report 2 is a 4-byte rumble output report.
+// HID report descriptor. Own layout, not copied from any vendor's descriptor. It follows what
+// IOHIDFamily's IOHIDEventDriver needs to classify a device as an extended game controller
+// (checkGameControllerElement in IOHIDEventDriver.cpp): sticks on Generic Desktop X/Y and Z/Rz,
+// triggers on Button 7 and 8, the d-pad on Generic Desktop DPad Up/Down/Left/Right, face
+// buttons on Button 1..4, shoulders on Button 5..6, stick clicks on Button 9..10. Menu and view
+// are Button 11..12. The guide button is Consumer AC Home. Report 2 is a 4-byte rumble output.
 static const uint8_t kReportDescriptor[] = {
     0x05, 0x01,                   // Usage Page (Generic Desktop)
     0x09, 0x05,                   // Usage (Game Pad)
@@ -57,54 +59,42 @@ static const uint8_t kReportDescriptor[] = {
     0x75, 0x10,                   //     Report Size (16)
     0x81, 0x02,                   //     Input (Data, Var, Abs)
     0xC0,                         //   End Collection
-    0x05, 0x02,                   //   Usage Page (Simulation Controls)
-    0x09, 0xC5,                   //   Usage (Brake)
+    0x05, 0x09,                   //   Usage Page (Button)
+    0x09, 0x07,                   //   Usage (Button 7) left trigger
+    0x09, 0x08,                   //   Usage (Button 8) right trigger
     0x15, 0x00,                   //   Logical Minimum (0)
     0x26, 0xFF, 0x03,             //   Logical Maximum (1023)
-    0x95, 0x01,                   //   Report Count (1)
-    0x75, 0x10,                   //   Report Size (16)
-    0x81, 0x02,                   //   Input (Data, Var, Abs)
-    0x09, 0xC4,                   //   Usage (Accelerator)
-    0x15, 0x00,                   //   Logical Minimum (0)
-    0x26, 0xFF, 0x03,             //   Logical Maximum (1023)
-    0x95, 0x01,                   //   Report Count (1)
+    0x95, 0x02,                   //   Report Count (2)
     0x75, 0x10,                   //   Report Size (16)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
     0x05, 0x01,                   //   Usage Page (Generic Desktop)
-    0x09, 0x39,                   //   Usage (Hat switch)
-    0x15, 0x01,                   //   Logical Minimum (1)
-    0x25, 0x08,                   //   Logical Maximum (8)
-    0x35, 0x00,                   //   Physical Minimum (0)
-    0x46, 0x3B, 0x01,             //   Physical Maximum (315)
-    0x66, 0x14, 0x00,             //   Unit (degrees)
-    0x75, 0x04,                   //   Report Size (4)
-    0x95, 0x01,                   //   Report Count (1)
-    0x81, 0x42,                   //   Input (Data, Var, Abs, Null State)
-    0x75, 0x04,                   //   Report Size (4)
-    0x95, 0x01,                   //   Report Count (1)
+    0x09, 0x90,                   //   Usage (DPad Up)
+    0x09, 0x91,                   //   Usage (DPad Down)
+    0x09, 0x92,                   //   Usage (DPad Left)
+    0x09, 0x93,                   //   Usage (DPad Right)
     0x15, 0x00,                   //   Logical Minimum (0)
-    0x25, 0x00,                   //   Logical Maximum (0)
-    0x35, 0x00,                   //   Physical Minimum (0)
-    0x45, 0x00,                   //   Physical Maximum (0)
-    0x65, 0x00,                   //   Unit (none)
-    0x81, 0x03,                   //   Input (Const) padding
+    0x25, 0x01,                   //   Logical Maximum (1)
+    0x75, 0x01,                   //   Report Size (1)
+    0x95, 0x04,                   //   Report Count (4)
+    0x81, 0x02,                   //   Input (Data, Var, Abs)
     0x05, 0x09,                   //   Usage Page (Button)
     0x19, 0x01,                   //   Usage Minimum (1)
-    0x29, 0x0A,                   //   Usage Maximum (10)
+    0x29, 0x06,                   //   Usage Maximum (6)  A B X Y LB RB
     0x15, 0x00,                   //   Logical Minimum (0)
     0x25, 0x01,                   //   Logical Maximum (1)
     0x75, 0x01,                   //   Report Size (1)
-    0x95, 0x0A,                   //   Report Count (10)
+    0x95, 0x06,                   //   Report Count (6)
+    0x81, 0x02,                   //   Input (Data, Var, Abs)
+    0x19, 0x09,                   //   Usage Minimum (9)
+    0x29, 0x0C,                   //   Usage Maximum (12)  LS RS menu view
+    0x95, 0x04,                   //   Report Count (4)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
     0x05, 0x0C,                   //   Usage Page (Consumer)
-    0x0A, 0x23, 0x02,             //   Usage (AC Home)
-    0x15, 0x00,                   //   Logical Minimum (0)
-    0x25, 0x01,                   //   Logical Maximum (1)
-    0x75, 0x01,                   //   Report Size (1)
+    0x0A, 0x23, 0x02,             //   Usage (AC Home) guide
     0x95, 0x01,                   //   Report Count (1)
     0x81, 0x02,                   //   Input (Data, Var, Abs)
     0x75, 0x01,                   //   Report Size (1)
-    0x95, 0x05,                   //   Report Count (5)
+    0x95, 0x01,                   //   Report Count (1)
     0x81, 0x03,                   //   Input (Const) padding
     0x06, 0x00, 0xFF,             //   Usage Page (Vendor 0xFF00)
     0x85, kRumbleReportID,        //   Report ID (2)
@@ -312,24 +302,11 @@ OSData *MacgipGamepad::newReportDescriptor(void)
     return OSData::withBytes(kReportDescriptor, sizeof kReportDescriptor);
 }
 
-static uint8_t hatFromButtons(uint16_t b)
-{
-    bool up = b & GIP_BTN_DPAD_UP, down = b & GIP_BTN_DPAD_DOWN;
-    bool left = b & GIP_BTN_DPAD_LEFT, right = b & GIP_BTN_DPAD_RIGHT;
-    if (up && right) return 2;
-    if (down && right) return 4;
-    if (down && left) return 6;
-    if (up && left) return 8;
-    if (up) return 1;
-    if (right) return 3;
-    if (down) return 5;
-    if (left) return 7;
-    return 0;   // null state
-}
-
 static void put16(uint8_t *p, uint16_t v) { p[0] = static_cast<uint8_t>(v); p[1] = static_cast<uint8_t>(v >> 8); }
 
 // Build the HID input report from the parsed GIP input and the cached guide state.
+// Layout: [0] report ID, [1..8] X Y Z Rz, [9..12] L2 R2, [13] dpad bits 0..3 then buttons 1..4,
+// [14] buttons 5 6 9 10 11 12, AC Home, pad.
 static void buildReport(uint8_t *r, const gip_input *in, bool guide)
 {
     r[0] = kInputReportID;
@@ -339,20 +316,24 @@ static void buildReport(uint8_t *r, const gip_input *in, bool guide)
     put16(r + 7, static_cast<uint16_t>(32767 - in->right_y));
     put16(r + 9, in->left_trigger);
     put16(r + 11, in->right_trigger);
-    r[13] = hatFromButtons(in->buttons);
-    uint16_t btn = 0;
-    if (in->buttons & GIP_BTN_A) btn |= 1u << 0;
-    if (in->buttons & GIP_BTN_B) btn |= 1u << 1;
-    if (in->buttons & GIP_BTN_X) btn |= 1u << 2;
-    if (in->buttons & GIP_BTN_Y) btn |= 1u << 3;
-    if (in->buttons & GIP_BTN_LB) btn |= 1u << 4;
-    if (in->buttons & GIP_BTN_RB) btn |= 1u << 5;
-    if (in->buttons & GIP_BTN_VIEW) btn |= 1u << 6;
-    if (in->buttons & GIP_BTN_MENU) btn |= 1u << 7;
-    if (in->buttons & GIP_BTN_LS) btn |= 1u << 8;
-    if (in->buttons & GIP_BTN_RS) btn |= 1u << 9;
-    if (guide) btn |= 1u << 10;
-    put16(r + 14, btn);
+    uint8_t b13 = 0, b14 = 0;
+    if (in->buttons & GIP_BTN_DPAD_UP) b13 |= 1u << 0;
+    if (in->buttons & GIP_BTN_DPAD_DOWN) b13 |= 1u << 1;
+    if (in->buttons & GIP_BTN_DPAD_LEFT) b13 |= 1u << 2;
+    if (in->buttons & GIP_BTN_DPAD_RIGHT) b13 |= 1u << 3;
+    if (in->buttons & GIP_BTN_A) b13 |= 1u << 4;
+    if (in->buttons & GIP_BTN_B) b13 |= 1u << 5;
+    if (in->buttons & GIP_BTN_X) b13 |= 1u << 6;
+    if (in->buttons & GIP_BTN_Y) b13 |= 1u << 7;
+    if (in->buttons & GIP_BTN_LB) b14 |= 1u << 0;
+    if (in->buttons & GIP_BTN_RB) b14 |= 1u << 1;
+    if (in->buttons & GIP_BTN_LS) b14 |= 1u << 2;
+    if (in->buttons & GIP_BTN_RS) b14 |= 1u << 3;
+    if (in->buttons & GIP_BTN_MENU) b14 |= 1u << 4;
+    if (in->buttons & GIP_BTN_VIEW) b14 |= 1u << 5;
+    if (guide) b14 |= 1u << 6;
+    r[13] = b13;
+    r[14] = b14;
 }
 
 void IMPL(MacgipGamepad, ReadComplete)
