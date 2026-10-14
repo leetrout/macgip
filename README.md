@@ -3,7 +3,7 @@
 
   <h1>macgip</h1>
   
-  [![License](https://img.shields.io/badge/MIT-blue)](./LICENSE.md)
+  [![License](https://img.shields.io/badge/License-MIT-blue)](./LICENSE.md)
   [![Protected by Fencer](https://app.fencer.dev/trust/IG6oaYQ6BH5IlKljBuEZeqxpWid50W5M.svg)](https://app.fencer.dev/trust/IG6oaYQ6BH5IlKljBuEZeqxpWid50W5M/)
 
 </div>
