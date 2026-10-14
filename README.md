@@ -1,9 +1,15 @@
+
 <div align="center">
+
   <h1>macgip</h1>
+  
   [![License](https://img.shields.io/badge/MIT-blue)](./LICENSE.md)
   [![Protected by Fencer](https://app.fencer.dev/trust/IG6oaYQ6BH5IlKljBuEZeqxpWid50W5M.svg)](https://app.fencer.dev/trust/IG6oaYQ6BH5IlKljBuEZeqxpWid50W5M/)
+
 </div>
+
 <br>
+
 A macOS driver for wired gamepads that speak GIP, compatible with Xbox controllers. The first
 target is the PowerA wired controller for Xbox Series X, USB ID `0x20d6:0x2007`, which macOS
 does not support out of the box.
