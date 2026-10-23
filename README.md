@@ -10,15 +10,21 @@
 
 <br>
 
-A macOS driver for wired gamepads that speak GIP, compatible with Xbox controllers. The first
-target is the PowerA wired controller for Xbox Series X, USB ID `0x20d6:0x2007`, which macOS
-does not support out of the box.
+A macOS driver for wired gamepads that speak GIP, compatible with Xbox controllers. It supports
+these pads, which macOS does not support out of the box:
+
+- the PowerA wired controller for Xbox Series X, USB ID `0x20d6:0x2007`
+- the PDP Afterglow Wave Wired Controller for Xbox, USB ID `0x0e6f:0x0338`
+
+The driver support for the PDP pad is not yet tested on hardware. `tools/gip_probe.c` is tested
+with it.
 
 ## Trademarks
 
 Xbox, Xbox One and Xbox Series X are trademarks of the Microsoft group of companies. PowerA is a
-trademark of its owner (ACCO Brands Corporation at the time of writing). This project is not
-made, endorsed, sponsored or supported by Microsoft or PowerA. Trademarks appear here only to
+trademark of its owner (ACCO Brands Corporation at the time of writing). PDP and Afterglow are
+trademarks of their owner (Turtle Beach Corporation at the time of writing). This project is not
+made, endorsed, sponsored or supported by Microsoft, PowerA or PDP. Trademarks appear here only to
 state which products this software is compatible with. Device strings quoted from the hardware,
 such as the USB product string, are reproduced verbatim as technical data.
 
