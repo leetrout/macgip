@@ -1,7 +1,7 @@
 // MacgipGamepad: GIP interface 0 as a HID gamepad.
 //
-// Flow: handleStart opens the interface, sends power-on and LED, and arms one interrupt IN
-// read. ReadComplete parses the packet with the gip core, turns input into a HID report, and
+// Flow: handleStart opens the interface, finds its interrupt endpoints, sends power-on and LED
+// (and the security packet for PDP pads), and arms one interrupt IN read. ReadComplete parses the packet with the gip core, turns input into a HID report, and
 // re-arms the read at once. The pad resets itself if the host stops reading, so the read is
 // always pending. setReport turns the rumble output report into a GIP rumble packet.
 #include <os/log.h>
@@ -20,8 +20,6 @@
 
 #define LOG(fmt, ...) os_log(OS_LOG_DEFAULT, "macgip hid: " fmt, ##__VA_ARGS__)
 
-static const uint8_t kEndpointIn = 0x82;
-static const uint8_t kEndpointOut = 0x02;
 static const uint32_t kPacketSize = 64;
 static const uint8_t kInputReportID = 1;
 static const uint8_t kRumbleReportID = 2;
@@ -94,7 +92,7 @@ static const uint8_t kReportDescriptor[] = {
     // and AC Home is the Home button, which macOS itself handles (it opens the Games app).
     // Button usages 11..16 arrive as L4, R4 and M1..M4 instead, and Consumer Menu, AC Back,
     // AC Search, Menu Pick, Menu Escape, AL Control Panel, AC Stop and the System Menu usages map
-    // to nothing. Record (0xB2) arrives as the Share button; this pad has no share button.
+    // to nothing. Record (0xB2) arrives as the Share button; the PowerA pad has no share button.
     0x05, 0x0C,                   //   Usage Page (Consumer)
     0x0A, 0x04, 0x02,             //   Usage (AC Exit) menu button
     0x0A, 0x09, 0x02,             //   Usage (AC Properties) view button
@@ -136,6 +134,9 @@ struct MacgipGamepad_IVars {
     bool guidePressed;
     bool stopping;
     bool interfaceOpen;
+    uint16_t vendorID;        // from the USB device descriptor
+    uint16_t productID;
+    uint16_t deviceVersion;   // bcdDevice
 };
 
 bool MacgipGamepad::init()
@@ -198,6 +199,67 @@ static void teardown(MacgipGamepad *self, MacgipGamepad_IVars *iv)
     }
 }
 
+// Find the interrupt IN and OUT endpoints of the interface. The PowerA pad uses 0x82 and 0x02,
+// the PDP Afterglow Wave uses 0x81 and 0x01.
+static bool findEndpoints(IOUSBHostInterface *interface, uint8_t *in, uint8_t *out)
+{
+    *in = 0;
+    *out = 0;
+    const IOUSBConfigurationDescriptor *config = interface->CopyConfigurationDescriptor();
+    if (!config) {
+        return false;
+    }
+    const IOUSBInterfaceDescriptor *intf = interface->GetInterfaceDescriptor(config);
+    const IOUSBEndpointDescriptor *ep = nullptr;
+    while (intf && (ep = IOUSBGetNextEndpointDescriptor(config, intf, reinterpret_cast<const IOUSBDescriptorHeader *>(ep))) != nullptr) {
+        if (IOUSBGetEndpointType(ep) != kIOUSBEndpointTypeInterrupt) {
+            continue;
+        }
+        uint8_t address = IOUSBGetEndpointAddress(ep);
+        if (IOUSBGetEndpointDirection(ep) == kIOUSBEndpointDirectionIn) {
+            if (!*in) {
+                *in = address;
+            }
+        } else if (!*out) {
+            *out = address;
+        }
+    }
+    IOUSBHostFreeDescriptor(config);
+    return *in && *out;
+}
+
+// Read the USB vendor ID, product ID and bcdDevice. The HID device reports the same values.
+static bool readDeviceIDs(IOUSBHostInterface *interface, MacgipGamepad_IVars *iv)
+{
+    IOUSBHostDevice *device = nullptr;
+    if (interface->CopyDevice(&device) != kIOReturnSuccess || !device) {
+        return false;
+    }
+    const IOUSBDeviceDescriptor *desc = device->CopyDeviceDescriptor();
+    bool ok = desc != nullptr;
+    if (ok) {
+        iv->vendorID = USBToHost16(desc->idVendor);
+        iv->productID = USBToHost16(desc->idProduct);
+        iv->deviceVersion = USBToHost16(desc->bcdDevice);
+        IOUSBHostFreeDescriptor(desc);
+    }
+    OSSafeReleaseNULL(device);
+    return ok;
+}
+
+// Manufacturer strings as the devices report them.
+static const char *manufacturerName(uint16_t vendorID)
+{
+    switch (vendorID) {
+    case 0x20d6:
+        return "PowerA";
+    case GIP_VENDOR_PDP:
+        return "Performance Designed Products";
+    default:
+        return nullptr;
+    }
+}
+
 bool MacgipGamepad::handleStart(IOService *provider)
 {
     kern_return_t ret;
@@ -210,19 +272,30 @@ bool MacgipGamepad::handleStart(IOService *provider)
     }
     iv->interface->retain();
 
+    if (!readDeviceIDs(iv->interface, iv)) {
+        LOG("cannot read the device descriptor");
+        return false;
+    }
+    uint8_t endpointIn = 0, endpointOut = 0;
+    if (!findEndpoints(iv->interface, &endpointIn, &endpointOut)) {
+        LOG("no interrupt IN and OUT endpoints on the interface");
+        return false;
+    }
+    LOG("device %04x:%04x, endpoints IN 0x%02x OUT 0x%02x", iv->vendorID, iv->productID, endpointIn, endpointOut);
+
     ret = iv->interface->Open(this, 0, 0);
     if (ret != kIOReturnSuccess) {
         LOG("interface Open failed: 0x%x", ret);
         return false;
     }
     iv->interfaceOpen = true;
-    ret = iv->interface->CopyPipe(kEndpointIn, &iv->inPipe);
+    ret = iv->interface->CopyPipe(endpointIn, &iv->inPipe);
     if (ret != kIOReturnSuccess) {
         LOG("CopyPipe IN failed: 0x%x", ret);
         teardown(this, iv);
         return false;
     }
-    ret = iv->interface->CopyPipe(kEndpointOut, &iv->outPipe);
+    ret = iv->interface->CopyPipe(endpointOut, &iv->outPipe);
     if (ret != kIOReturnSuccess) {
         LOG("CopyPipe OUT failed: 0x%x", ret);
         teardown(this, iv);
@@ -253,7 +326,8 @@ bool MacgipGamepad::handleStart(IOService *provider)
         return false;
     }
 
-    // Init sequence, verified on hardware: power-on, then the guide LED.
+    // Init sequence, verified on hardware: power-on, then the guide LED. PDP pads also need the
+    // security packet after the LED packet, or they send no input (notes/protocol.md).
     size_t n = gip_encode_power_on(&iv->encoder, iv->outBytes);
     iv->outBuffer->SetLength(static_cast<uint64_t>(n));
     ret = writeSync(iv, n);
@@ -267,6 +341,14 @@ bool MacgipGamepad::handleStart(IOService *provider)
     ret = writeSync(iv, n);
     if (ret != kIOReturnSuccess) {
         LOG("LED write failed: 0x%x", ret);
+    }
+    if (iv->vendorID == GIP_VENDOR_PDP) {
+        n = gip_encode_security_passed(&iv->encoder, iv->outBytes);
+        iv->outBuffer->SetLength(static_cast<uint64_t>(n));
+        ret = writeSync(iv, n);
+        if (ret != kIOReturnSuccess) {
+            LOG("security write failed: 0x%x", ret);
+        }
     }
 
     ret = iv->inPipe->AsyncIO(iv->inBuffer, kPacketSize, iv->readAction, 0);
@@ -295,11 +377,15 @@ OSDictionary *MacgipGamepad::newDeviceDescription(void)
         return nullptr;
     }
     // The USB IDs pass through: this HID device is that controller. See issue #11.
-    OSDictionarySetUInt64Value(d, kIOHIDVendorIDKey, 0x20d6);
-    OSDictionarySetUInt64Value(d, kIOHIDProductIDKey, 0x2007);
-    OSDictionarySetUInt64Value(d, kIOHIDVersionNumberKey, 0x0167);
+    // handleStart reads them from the device descriptor.
+    OSDictionarySetUInt64Value(d, kIOHIDVendorIDKey, ivars->vendorID);
+    OSDictionarySetUInt64Value(d, kIOHIDProductIDKey, ivars->productID);
+    OSDictionarySetUInt64Value(d, kIOHIDVersionNumberKey, ivars->deviceVersion);
     OSDictionarySetStringValue(d, kIOHIDTransportKey, "USB");
-    OSDictionarySetStringValue(d, kIOHIDManufacturerKey, "PowerA");
+    const char *manufacturer = manufacturerName(ivars->vendorID);
+    if (manufacturer) {
+        OSDictionarySetStringValue(d, kIOHIDManufacturerKey, manufacturer);
+    }
     OSDictionarySetStringValue(d, kIOHIDProductKey, "Wired Controller (compatible with Xbox) via macgip");
     OSDictionarySetUInt64Value(d, kIOHIDPrimaryUsagePageKey, kHIDPage_GenericDesktop);
     OSDictionarySetUInt64Value(d, kIOHIDPrimaryUsageKey, kHIDUsage_GD_GamePad);

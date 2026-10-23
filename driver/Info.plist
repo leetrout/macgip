@@ -45,6 +45,29 @@
 			<key>idVendor</key>
 			<integer>8406</integer>
 		</dict>
+		<key>macgipGamepadPDP</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleIdentifierKernel</key>
+			<string>com.apple.iokit.IOHIDFamily</string>
+			<key>IOClass</key>
+			<string>AppleUserHIDDevice</string>
+			<key>IOProviderClass</key>
+			<string>IOUSBHostInterface</string>
+			<key>IOUserClass</key>
+			<string>MacgipGamepad</string>
+			<key>IOUserServerName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>bConfigurationValue</key>
+			<integer>1</integer>
+			<key>bInterfaceNumber</key>
+			<integer>0</integer>
+			<key>idProduct</key>
+			<integer>824</integer>
+			<key>idVendor</key>
+			<integer>3695</integer>
+		</dict>
 		<key>macgipUSBDevice</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
@@ -68,9 +91,32 @@
 			<key>idVendor</key>
 			<integer>8406</integer>
 		</dict>
+		<key>macgipUSBDevicePDP</key>
+		<dict>
+			<key>CFBundleIdentifier</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleIdentifierKernel</key>
+			<string>com.apple.kpi.iokit</string>
+			<key>IOClass</key>
+			<string>IOUserService</string>
+			<key>IOMatchCategory</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>IOProviderClass</key>
+			<string>IOUSBHostDevice</string>
+			<key>IOUserClass</key>
+			<string>MacgipUSBDevice</string>
+			<key>IOUserServerName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>bDeviceClass</key>
+			<integer>255</integer>
+			<key>idProduct</key>
+			<integer>824</integer>
+			<key>idVendor</key>
+			<integer>3695</integer>
+		</dict>
 	</dict>
 	<key>NSHumanReadableCopyright</key>
-	<string>MIT licence. Not affiliated with Microsoft or PowerA.</string>
+	<string>MIT licence. Not affiliated with Microsoft, PowerA or PDP.</string>
 	<key>OSBundleUsageDescription</key>
 	<string>Driver for wired GIP gamepads compatible with Xbox controllers that macOS does not support.</string>
 	<key>OSMinimumDriverKitVersion</key>
