@@ -52,6 +52,10 @@ enum {
 #define GIP_MAX_PACKET 64
 #define GIP_TRIGGER_MAX 1023
 
+// PDP pads send no input until the host sends the guide LED packet and then the security packet
+// after power-on (SDL, xpad). Other vendors need only power-on.
+#define GIP_VENDOR_PDP 0x0e6f
+
 typedef enum {
     GIP_PKT_UNKNOWN = 0,
     GIP_PKT_ANNOUNCE,
@@ -66,6 +70,7 @@ typedef struct {
     uint16_t right_trigger;    // 0..1023
     int16_t left_x, left_y;    // -32768..32767, Y positive is up
     int16_t right_x, right_y;
+    bool share;                // share button; only reports of 50 bytes or more carry it
 } gip_input;
 
 typedef struct {

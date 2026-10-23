@@ -42,6 +42,22 @@ static void test_announce(void)
     CHECK(p.u.announce.address[0] == 0xab && p.u.announce.address[5] == 0x6d);
 }
 
+static void test_announce_pdp(void)
+{
+    // PDP Afterglow Wave 0e6f:0338, firmware 2.0.3.0, hardware 2.1.1.1. The real device
+    // address is replaced with 01 02 03 04 05 06.
+    uint8_t b[64];
+    size_t n = from_hex("02 20 79 1c 01 02 03 04 05 06 00 00 6f 0e 38 03 02 00 00 00 03 00 00 00 02 00 01 00 01 00 01 00", b, 64);
+    gip_packet p;
+    CHECK(n == 32);
+    CHECK(gip_parse(b, n, &p));
+    CHECK(p.kind == GIP_PKT_ANNOUNCE);
+    CHECK(p.sequence == 0x79 && p.length == 28);
+    CHECK(p.u.announce.vendor_id == GIP_VENDOR_PDP);
+    CHECK(p.u.announce.product_id == 0x0338);
+    CHECK(p.u.announce.address[0] == 0x01 && p.u.announce.address[5] == 0x06);
+}
+
 static void test_status_guide_unknown(void)
 {
     uint8_t b[64]; gip_packet p;
@@ -89,6 +105,53 @@ static void test_input_bits(void)
     CHECK(p.u.input.left_trigger == 1023 && p.u.input.right_trigger == 1023);
     CHECK(p.u.input.left_x == 32767 && p.u.input.left_y == -32768);
     CHECK(p.u.input.right_x == 32767 && p.u.input.right_y == -32768);
+}
+
+static void test_status_pdp(void)
+{
+    // PDP keep-alive, and the status packet the PDP pad sent after the LED packet
+    // (captures/2026-10-22-pdp-probe-run2.txt).
+    uint8_t b[64]; gip_packet p;
+    size_t n = from_hex("03 20 01 04 80 00 00 00", b, 64);
+    CHECK(gip_parse(b, n, &p) && p.kind == GIP_PKT_STATUS && p.u.status == 0x80);
+    n = from_hex("03 20 02 04 80 01 00 00", b, 64);
+    CHECK(gip_parse(b, n, &p) && p.kind == GIP_PKT_STATUS && p.u.status == 0x80);
+}
+
+static void test_input_pdp(void)
+{
+    // PDP Afterglow Wave layout: 50 bytes, payload 0x2e, share in bit 0 of byte 32 (len - 18).
+    // Synthetic values: A, RB, half left trigger, full right trigger, share pressed.
+    uint8_t b[64]; gip_packet p;
+    size_t n = from_hex("20 00 12 2e 10 20 00 02 ff 03 ff 7f 00 80 34 12 cc ed"
+                        " 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00"
+                        " 00 00 00 00 00 00 00 00", b, 64);
+    CHECK(n == 50);
+    CHECK(gip_parse(b, n, &p) && p.kind == GIP_PKT_INPUT);
+    CHECK(p.length == 0x2e);
+    CHECK(p.u.input.buttons == (GIP_BTN_A | GIP_BTN_RB));
+    CHECK(p.u.input.left_trigger == 512 && p.u.input.right_trigger == GIP_TRIGGER_MAX);
+    CHECK(p.u.input.left_x == 32767 && p.u.input.left_y == -32768);
+    CHECK(p.u.input.right_x == 0x1234 && p.u.input.right_y == -0x1234);
+    CHECK(p.u.input.share);
+    b[32] = 0x00;
+    CHECK(gip_parse(b, n, &p) && !p.u.input.share);
+    // A report shorter than 50 bytes has no share bit at len - 18.
+    n = from_hex("20 00 00 0e 01 00 00 00 00 00 00 00 00 00 00 00 00 00", b, 64);
+    CHECK(gip_parse(b, n, &p) && !p.u.input.share);
+}
+
+static void test_pdp_start(void)
+{
+    // PDP start sequence: power-on, guide LED on, security passed (SDL, xpad).
+    gip_encoder e = { 0 };
+    uint8_t out[GIP_MAX_PACKET];
+    static const uint8_t power_on[] = { 0x05, 0x20, 0x01, 0x01, 0x00 };
+    static const uint8_t led[] = { 0x0a, 0x20, 0x02, 0x03, 0x00, 0x01, 0x14 };
+    static const uint8_t sec[] = { 0x06, 0x20, 0x03, 0x02, 0x01, 0x00 };
+    CHECK(gip_encode_power_on(&e, out) == sizeof power_on && !memcmp(out, power_on, sizeof power_on));
+    CHECK(gip_encode_led(&e, out, 0x14) == sizeof led && !memcmp(out, led, sizeof led));
+    CHECK(gip_encode_security_passed(&e, out) == sizeof sec && !memcmp(out, sec, sizeof sec));
 }
 
 static void test_encoders(void)
@@ -156,11 +219,13 @@ static void test_replay(const char *path)
         if (strstr(dec, " RB ")) want |= GIP_BTN_RB;
         if (strstr(dec, " LS ")) want |= GIP_BTN_LS;
         if (strstr(dec, " RS ")) want |= GIP_BTN_RS;
+        bool want_share = strstr(dec, " SHARE ") != NULL;
         long lt = strtol(strstr(dec, "LT=") + 3, NULL, 10), rt = strtol(strstr(dec, "RT=") + 3, NULL, 10);
         long lx = strtol(strstr(dec, "LX=") + 3, NULL, 10), ly = strtol(strstr(dec, "LY=") + 3, NULL, 10);
         long rx = strtol(strstr(dec, "RX=") + 3, NULL, 10), ry = strtol(strstr(dec, "RY=") + 3, NULL, 10);
         if (i->buttons != want || i->left_trigger != lt || i->right_trigger != rt ||
-            i->left_x != lx || i->left_y != ly || i->right_x != rx || i->right_y != ry) {
+            i->left_x != lx || i->left_y != ly || i->right_x != rx || i->right_y != ry ||
+            i->share != want_share) {
             failures++;
             fprintf(stderr, "FAIL replay mismatch: %s", line);
         }
@@ -174,9 +239,13 @@ static void test_replay(const char *path)
 int main(int argc, char **argv)
 {
     test_announce();
+    test_announce_pdp();
     test_status_guide_unknown();
+    test_status_pdp();
     test_input_rest();
     test_input_bits();
+    test_input_pdp();
+    test_pdp_start();
     test_encoders();
     for (int a = 1; a < argc; a++) test_replay(argv[a]);
     if (argc > 1) CHECK(replayed_total > 0);
