@@ -21,8 +21,9 @@ static size_t from_hex(const char *hex, uint8_t *out, size_t max)
         while (*hex == ' ') hex++;
         if (!*hex) break;
         char *end;
-        out[n++] = (uint8_t)strtoul(hex, &end, 16);
-        if (end == hex) break;
+        unsigned long v = strtoul(hex, &end, 16);
+        if (end == hex) break;   // no hex digit, for example the newline at the end of a line
+        out[n++] = (uint8_t)v;
         hex = end;
     }
     return n;
