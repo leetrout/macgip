@@ -65,7 +65,7 @@ Dump USB descriptors (IOUSBLib, no exclusive open):
 clang -o /tmp/usbdesc tools/usbdesc.c -framework IOKit -framework CoreFoundation && /tmp/usbdesc 0x20d6 0x2007
 ```
 
-Probe the pad over libusb. Sends only the power-on packet, and the PowerA rumble begin and end packets if no input arrives:
+Probe the pad over libusb. The probe finds the GIP interface and its endpoints in the descriptors. It sends the power-on packet. For a PDP pad (vendor `0x0e6f`) it then sends the guide LED and security packets. For other pads it sends the PowerA rumble begin and end packets if no input arrives:
 
 ```bash
 clang -O1 -o /tmp/gip_probe tools/gip_probe.c $(PKG_CONFIG_PATH=/opt/homebrew/lib/pkgconfig pkg-config --cflags --libs libusb-1.0) -lpthread && /tmp/gip_probe 60
@@ -73,7 +73,7 @@ clang -O1 -o /tmp/gip_probe tools/gip_probe.c $(PKG_CONFIG_PATH=/opt/homebrew/li
 
 The pad removes itself from the bus 30 to 90 s after the probe exits, because nothing keeps polling it. Replug it before the next run. See `notes/disconnect.md`.
 
-Options: `--raw` (no decoding), `--no-init` (listen only), `--force-rumble` (send rumble even when input works), `--led` (send the guide LED packet after power-on). The number is the run time in seconds. Press every control during the run to verify the decode table in `notes/protocol.md`.
+Options: `--vid` and `--pid` (the USB IDs, default `0x20d6` and `0x2007`), `--raw` (no decoding), `--no-init` (listen only), `--force-rumble` (send rumble even when input works), `--led` (send the guide LED packet after power-on). The number is the run time in seconds, and it must be the first argument. For the PDP pad, run `/tmp/gip_probe 60 --vid 0x0e6f --pid 0x0338`. Press every control during the run to verify the decode table in `notes/protocol.md`.
 
 Check whether SDL3 sees the pad:
 
