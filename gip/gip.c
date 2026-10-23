@@ -20,7 +20,8 @@ bool gip_parse(const uint8_t *buf, size_t len, gip_packet *out)
     switch (buf[0]) {
     case GIP_CMD_INPUT:
         // 4-byte header, 2 bytes buttons, 2 x u16 triggers, 4 x s16 sticks. Payload lengths
-        // of 14 (first-party) and 32 (this PowerA unit, zero padded) are both seen.
+        // of 14 (first-party), 32 (the PowerA unit, zero padded) and 46 (the PDP Afterglow
+        // Wave) are seen.
         if (len < 18) {
             return false;
         }
@@ -32,6 +33,11 @@ bool gip_parse(const uint8_t *buf, size_t len, gip_packet *out)
         out->u.input.left_y = rd_s16(buf + 12);
         out->u.input.right_x = rd_s16(buf + 14);
         out->u.input.right_y = rd_s16(buf + 16);
+        // A report of 50 bytes or more has the share button in bit 0 of byte len - 18. SDL and
+        // xpad agree on this position for these lengths. Shorter reports use other positions.
+        if (len >= 50) {
+            out->u.input.share = (buf[len - 18] & 0x01) != 0;
+        }
         return true;
 
     case GIP_CMD_GUIDE:

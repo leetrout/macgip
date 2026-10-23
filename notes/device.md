@@ -62,3 +62,35 @@ Each also has a device-level `XboxUSBDevice` personality on `IOUSBHostDevice` wi
 Handoff table row: "Interface is `FF/47/D0`, no driver attached". Go to Phase 2.
 
 Because no driver holds the interface, a userspace libusb client can claim interface 0 without `sudo`.
+
+## Second device: PDP Afterglow Wave Wired Controller for Xbox
+
+Collected 2026-10-22 on the contributor's Mac (macOS on Apple Silicon, SIP enabled). Raw descriptor bytes are in `captures/2026-10-22-pdp-descriptors.txt`. The serial number is left out on purpose: the GIP device address in the announce packet is derived from it.
+
+| Field | Value |
+|---|---|
+| Vendor ID | `0x0e6f` (3695), string "Performance Designed Products" |
+| Product ID | `0x0338` (824) |
+| Product string | "PDP Afterglow Wave Wired Controller for Xbox- Purple" |
+| bcdDevice | `0x0300` |
+| bcdUSB | `0x0200` |
+| Device class / subclass / protocol | `0xFF` / `0x47` / `0xD0` |
+| bMaxPacketSize0 | 64 |
+| Speed | full speed, 12 Mbit/s |
+| Configurations | 1 |
+
+Configuration 1: 2 interfaces, bus powered, remote wake, 500 mA.
+
+| Interface | Alt | Class/Sub/Proto | Endpoints |
+|---|---|---|---|
+| 0 | 0 | `FF/47/D0` | `0x81` IN interrupt 64 B, interval 4; `0x01` OUT interrupt 64 B, interval 4 |
+| 1 | 0 | `FF/47/D0` | none |
+| 1 | 1 | `FF/47/D0` | `0x02` OUT iso 214 B, interval 1; `0x83` IN iso 118 B, interval 1 (audio) |
+
+Differences from the PowerA pad:
+
+- The interrupt endpoints of interface 0 are `0x81` and `0x01`, not `0x82` and `0x02`. Read the endpoint addresses from the interface descriptor. Do not hard-code them.
+- There is no interface 2 (bulk data).
+- The device subclass and protocol are `0x47` and `0xD0`, not `0xFF` and `0xFF`. The device class is `0xFF` on both.
+
+Apple's `XboxGamepad.dext` does not match this ID either. Its personalities name Microsoft IDs only (see above). No driver held interface 0, and a libusb client claimed it without `sudo`. A Chrome process had the device open (an `AppleUSBHostDeviceUserClient`) at the same time. The claim still worked.

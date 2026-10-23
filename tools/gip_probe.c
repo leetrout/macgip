@@ -1,17 +1,20 @@
 // gip_probe: userspace proof of concept for a wired GIP gamepad (compatible with Xbox One and Series controllers) via libusb.
 //
 // Steps:
-//   1. Open the pad by vendor and product ID and claim interface 0.
+//   1. Open the pad by vendor and product ID. Find the GIP interface (class FF/47/D0) and its
+//      interrupt IN and OUT endpoints in the configuration descriptor. Claim that interface.
 //   2. Read the interrupt IN endpoint in a thread. Hex-dump every packet with a timestamp.
 //   3. Listen for a while (expect an announce packet, command 0x02).
-//   4. Send the power-on packet. Listen.
-//   5. If no input report (command 0x20) arrived, send rumble begin, then rumble end. Listen.
+//   4. Send the power-on packet. For PDP pads (vendor 0x0e6f), also send the guide LED packet and
+//      the security packet at once, as SDL and xpad do. Listen.
+//   5. If no input report (command 0x20) arrived and the pad is not a PDP pad, send rumble begin,
+//      then rumble end. Listen.
 //   6. Decode input reports until the time limit.
 //
 // Only the known init and rumble packets are sent. Nothing else is written to the pad.
 //
 // Build: clang -O1 -o gip_probe gip_probe.c $(pkg-config --cflags --libs libusb-1.0) -lpthread
-// Run:   ./gip_probe [seconds] [--no-init] [--force-rumble] [--led] [--raw]
+// Run:   ./gip_probe [seconds] [--vid 0x20d6] [--pid 0x2007] [--no-init] [--force-rumble] [--led] [--raw]
 
 #include <libusb.h>
 #include <pthread.h>
@@ -23,11 +26,14 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#define VID 0x20d6
-#define PID 0x2007
-#define IFACE 0
-#define EP_IN 0x82
-#define EP_OUT 0x02
+#define DEFAULT_VID 0x20d6
+#define DEFAULT_PID 0x2007
+#define VID_PDP 0x0e6f
+
+// GIP interface class, subclass and protocol.
+#define GIP_CLASS 0xff
+#define GIP_SUBCLASS 0x47
+#define GIP_PROTOCOL 0xd0
 
 // Init sequence as data. Byte 2 of each packet is the GIP sequence number. The sender fills it in.
 typedef struct { const char *name; uint8_t data[64]; int len; } packet_t;
@@ -35,10 +41,14 @@ typedef struct { const char *name; uint8_t data[64]; int len; } packet_t;
 static const packet_t PKT_POWER_ON   = { "power-on (05 20 seq 01 00)", {0x05, 0x20, 0x00, 0x01, 0x00}, 5 };
 static const packet_t PKT_RUMBLE_ON  = { "PowerA rumble begin",  {0x09, 0x00, 0x00, 0x09, 0x00, 0x0F, 0x00, 0x00, 0x1D, 0x1D, 0xFF, 0x00, 0x00}, 13 };
 // Guide LED on, brightness 0x14. SDL and xone send this during init. Off by default here; enable with --led.
+// PDP pads always get it, because they send no input before it.
 static const packet_t PKT_LED_ON     = { "guide LED on (0a 20 seq 03 00 01 14)", {0x0A, 0x20, 0x00, 0x03, 0x00, 0x01, 0x14}, 7 };
+// Security check passed. PDP pads need it after the LED packet before they send input (SDL, xpad).
+static const packet_t PKT_SECURITY   = { "security passed (06 20 seq 02 01 00)", {0x06, 0x20, 0x00, 0x02, 0x01, 0x00}, 6 };
 static const packet_t PKT_RUMBLE_OFF = { "PowerA rumble end",    {0x09, 0x00, 0x00, 0x09, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, 13 };
 
 static libusb_device_handle *h;
+static uint8_t ep_in, ep_out;
 static atomic_int running = 1;
 static atomic_int got_input = 0;
 static atomic_int got_announce = 0;
@@ -68,11 +78,14 @@ static void decode(const uint8_t *d, int n) {
         got_input = 1;
         if (!decode_input) return;
         uint8_t b4 = d[4], b5 = d[5];
-        printf("         INPUT  %s%s%s%s%s%s  dpad:%s%s%s%s %s%s%s%s  LT=%4u RT=%4u  LX=%6d LY=%6d RX=%6d RY=%6d\n",
+        // Reports of 50 bytes or more carry the share button in bit 0 of byte len - 18.
+        int share = n >= 50 && (d[n - 18] & 0x01);
+        printf("         INPUT  %s%s%s%s%s%s  dpad:%s%s%s%s %s%s%s%s%s  LT=%4u RT=%4u  LX=%6d LY=%6d RX=%6d RY=%6d\n",
                (b4 & 0x10) ? "A" : "-", (b4 & 0x20) ? "B" : "-", (b4 & 0x40) ? "X" : "-", (b4 & 0x80) ? "Y" : "-",
                (b4 & 0x04) ? " MENU" : "", (b4 & 0x08) ? " VIEW" : "",
                (b5 & 0x01) ? "U" : "-", (b5 & 0x02) ? "D" : "-", (b5 & 0x04) ? "L" : "-", (b5 & 0x08) ? "R" : "-",
                (b5 & 0x10) ? "LB " : "", (b5 & 0x20) ? "RB " : "", (b5 & 0x40) ? "LS " : "", (b5 & 0x80) ? "RS " : "",
+               share ? "SHARE " : "",
                u16(d + 6), u16(d + 8), s16(d + 10), s16(d + 12), s16(d + 14), s16(d + 16));
         fflush(stdout);
     } else if (cmd == 0x07) {
@@ -85,6 +98,9 @@ static void decode(const uint8_t *d, int n) {
     } else if (cmd == 0x03) {
         printf("         STATUS (cmd 0x03)\n");
         fflush(stdout);
+    } else if (cmd == 0x04) {
+        printf("         METADATA (cmd 0x04)\n");
+        fflush(stdout);
     }
 }
 
@@ -93,7 +109,7 @@ static void *reader(void *arg) {
     uint8_t buf[64];
     while (running) {
         int got = 0;
-        int r = libusb_interrupt_transfer(h, EP_IN, buf, sizeof buf, &got, 200);
+        int r = libusb_interrupt_transfer(h, ep_in, buf, sizeof buf, &got, 200);
         if (r == 0 && got > 0) { hexdump("IN ", buf, got); decode(buf, got); }
         else if (r != LIBUSB_ERROR_TIMEOUT) { printf("%8.3f IN  error: %s\n", now(), libusb_error_name(r)); fflush(stdout); usleep(100000); }
     }
@@ -104,7 +120,7 @@ static int send_packet(const packet_t *p) {
     uint8_t buf[64]; memcpy(buf, p->data, p->len);
     buf[2] = seq++;
     int sent = 0;
-    int r = libusb_interrupt_transfer(h, EP_OUT, buf, p->len, &sent, 1000);
+    int r = libusb_interrupt_transfer(h, ep_out, buf, p->len, &sent, 1000);
     printf("%8.3f --- send %s\n", now(), p->name);
     hexdump("OUT", buf, p->len);
     if (r) printf("%8.3f OUT error: %s\n", now(), libusb_error_name(r));
@@ -114,30 +130,83 @@ static int send_packet(const packet_t *p) {
 
 static void listen_for(double secs) { double end = now() + secs; while (now() < end) usleep(10000); }
 
+// Find the first interface setting with class FF/47/D0 that has an interrupt IN and an interrupt OUT
+// endpoint. Returns 0 and fills in the configuration value, interface, setting and endpoints.
+static int find_gip_interface(libusb_device *dev, int *config, int *iface, int *alt) {
+    struct libusb_device_descriptor dd;
+    if (libusb_get_device_descriptor(dev, &dd)) return -1;
+    for (int c = 0; c < dd.bNumConfigurations; c++) {
+        struct libusb_config_descriptor *cd;
+        if (libusb_get_config_descriptor(dev, (uint8_t)c, &cd)) continue;
+        for (int i = 0; i < cd->bNumInterfaces; i++) {
+            const struct libusb_interface *itf = &cd->interface[i];
+            for (int a = 0; a < itf->num_altsetting; a++) {
+                const struct libusb_interface_descriptor *id = &itf->altsetting[a];
+                if (id->bInterfaceClass != GIP_CLASS || id->bInterfaceSubClass != GIP_SUBCLASS ||
+                    id->bInterfaceProtocol != GIP_PROTOCOL) continue;
+                uint8_t in = 0, out = 0;
+                for (int e = 0; e < id->bNumEndpoints; e++) {
+                    const struct libusb_endpoint_descriptor *ed = &id->endpoint[e];
+                    if ((ed->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) != LIBUSB_TRANSFER_TYPE_INTERRUPT) continue;
+                    if ((ed->bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK) == LIBUSB_ENDPOINT_IN) { if (!in) in = ed->bEndpointAddress; }
+                    else if (!out) out = ed->bEndpointAddress;
+                }
+                if (in && out) {
+                    *config = cd->bConfigurationValue;
+                    *iface = id->bInterfaceNumber;
+                    *alt = id->bAlternateSetting;
+                    ep_in = in;
+                    ep_out = out;
+                    libusb_free_config_descriptor(cd);
+                    return 0;
+                }
+            }
+        }
+        libusb_free_config_descriptor(cd);
+    }
+    return -1;
+}
+
 int main(int argc, char **argv) {
     double total = argc > 1 && argv[1][0] != '-' ? atof(argv[1]) : 20;
     int do_init = 1, force_rumble = 0, led = 0;
+    uint16_t vid = DEFAULT_VID, pid = DEFAULT_PID;
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "--no-init")) do_init = 0;
         if (!strcmp(argv[i], "--force-rumble")) force_rumble = 1;
         if (!strcmp(argv[i], "--raw")) decode_input = 0;
         if (!strcmp(argv[i], "--led")) led = 1;
+        if (!strcmp(argv[i], "--vid") && i + 1 < argc) vid = (uint16_t)strtoul(argv[++i], NULL, 0);
+        if (!strcmp(argv[i], "--pid") && i + 1 < argc) pid = (uint16_t)strtoul(argv[++i], NULL, 0);
     }
+    int pdp = vid == VID_PDP;
     gettimeofday(&t0, NULL);
     int r = libusb_init(NULL);
     if (r) { fprintf(stderr, "libusb_init: %s\n", libusb_error_name(r)); return 1; }
-    h = libusb_open_device_with_vid_pid(NULL, VID, PID);
-    if (!h) { fprintf(stderr, "device %04x:%04x not found or open failed\n", VID, PID); return 1; }
+    h = libusb_open_device_with_vid_pid(NULL, vid, pid);
+    if (!h) { fprintf(stderr, "device %04x:%04x not found or open failed\n", vid, pid); return 1; }
+    int gip_cfg, iface, alt;
+    if (find_gip_interface(libusb_get_device(h), &gip_cfg, &iface, &alt)) {
+        fprintf(stderr, "device %04x:%04x has no GIP interface (FF/47/D0) with interrupt endpoints\n", vid, pid);
+        return 1;
+    }
     int cfg = -1;
     libusb_get_configuration(h, &cfg);
-    printf("%8.3f opened %04x:%04x, current configuration=%d\n", now(), VID, PID, cfg);
-    if (cfg != 1) {
-        r = libusb_set_configuration(h, 1);
-        printf("%8.3f set_configuration(1): %s\n", now(), r ? libusb_error_name(r) : "ok");
+    printf("%8.3f opened %04x:%04x, current configuration=%d\n", now(), vid, pid, cfg);
+    printf("%8.3f GIP interface: configuration %d, interface %d, setting %d, IN 0x%02x, OUT 0x%02x\n",
+           now(), gip_cfg, iface, alt, ep_in, ep_out);
+    if (cfg != gip_cfg) {
+        r = libusb_set_configuration(h, gip_cfg);
+        printf("%8.3f set_configuration(%d): %s\n", now(), gip_cfg, r ? libusb_error_name(r) : "ok");
     }
-    r = libusb_claim_interface(h, IFACE);
-    printf("%8.3f claim_interface(%d): %s\n", now(), IFACE, r ? libusb_error_name(r) : "ok");
+    r = libusb_claim_interface(h, iface);
+    printf("%8.3f claim_interface(%d): %s\n", now(), iface, r ? libusb_error_name(r) : "ok");
     if (r) return 1;
+    if (alt != 0) {
+        r = libusb_set_interface_alt_setting(h, iface, alt);
+        printf("%8.3f set_interface_alt_setting(%d, %d): %s\n", now(), iface, alt, r ? libusb_error_name(r) : "ok");
+        if (r) return 1;
+    }
 
     pthread_t th; pthread_create(&th, NULL, reader, NULL);
 
@@ -146,9 +215,14 @@ int main(int argc, char **argv) {
 
     if (do_init) {
         send_packet(&PKT_POWER_ON);
+        if (pdp) {
+            send_packet(&PKT_LED_ON);
+            send_packet(&PKT_SECURITY);
+        }
         listen_for(2.0);
-        if (led) { send_packet(&PKT_LED_ON); listen_for(0.5); }
-        if (!got_input || force_rumble) {
+        if (led && !pdp) { send_packet(&PKT_LED_ON); listen_for(0.5); }
+        // The rumble trick is a PowerA quirk. PDP pads get it only with --force-rumble.
+        if ((!got_input && !pdp) || force_rumble) {
             printf("%8.3f --- no input report yet, trying PowerA rumble begin/end\n", now()); fflush(stdout);
             send_packet(&PKT_RUMBLE_ON);
             listen_for(0.3);
@@ -161,7 +235,7 @@ int main(int argc, char **argv) {
     while (now() < total) usleep(50000);
 
     running = 0; pthread_join(th, NULL);
-    libusb_release_interface(h, IFACE);
+    libusb_release_interface(h, iface);
     libusb_close(h);
     libusb_exit(NULL);
     printf("%8.3f done. got_announce=%d got_input=%d\n", now(), got_announce, got_input);

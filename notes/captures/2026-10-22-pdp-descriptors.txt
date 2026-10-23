@@ -1,0 +1,14 @@
+numConfigurations=1 currentConfiguration=1 (kr=0x0)
+speed code=1
+--- configuration descriptor 0: wTotalLength=64 bNumInterfaces=2 bConfigurationValue=1 bmAttributes=0xa0 bMaxPower=250 (x2mA)
+09 02 40 00 02 01 00 a0 fa 09 04 00 00 02 ff 47
+d0 00 07 05 81 03 40 00 04 07 05 01 03 40 00 04
+09 04 01 00 00 ff 47 d0 00 09 04 01 01 02 ff 47
+d0 00 07 05 02 01 d6 00 01 07 05 83 01 76 00 01
+  INTERFACE bInterfaceNumber=0 bAlternateSetting=0 bNumEndpoints=2 class=0xff subclass=0x47 protocol=0xd0 iInterface=0
+    ENDPOINT addr=0x81 (IN 1) attr=0x03 (interrupt) wMaxPacketSize=64 bInterval=4
+    ENDPOINT addr=0x01 (OUT 1) attr=0x03 (interrupt) wMaxPacketSize=64 bInterval=4
+  INTERFACE bInterfaceNumber=1 bAlternateSetting=0 bNumEndpoints=0 class=0xff subclass=0x47 protocol=0xd0 iInterface=0
+  INTERFACE bInterfaceNumber=1 bAlternateSetting=1 bNumEndpoints=2 class=0xff subclass=0x47 protocol=0xd0 iInterface=0
+    ENDPOINT addr=0x02 (OUT 2) attr=0x01 (iso) wMaxPacketSize=214 bInterval=1
+    ENDPOINT addr=0x83 (IN 3) attr=0x01 (iso) wMaxPacketSize=118 bInterval=1

@@ -137,3 +137,67 @@ Probe results that shaped this (`captures/2026-10-12-*-probe.txt`):
 - Consumer Menu, AC Back, AC Search, Menu Pick, Menu Escape, AL Control Panel, AC Stop, AC Desktop Show All Windows, and Generic Desktop System Main Menu and System App Menu arrive as nothing.
 - A report shorter than the descriptor declares is dropped silently. Keep report 1 at exactly 112 data bits.
 - Axis signs (verified 2026-10-12 in the app's preview): the framework reports the HID Y axis as is, so the driver passes GIP Y through unchanged and up is positive. 0x92 is DPad Right and 0x93 is DPad Left in the HID usage table.
+
+# Protocol findings: PDP Afterglow Wave 0x0e6f:0x0338
+
+Sources, 2026-10-22:
+
+- The contributor captured the packets with a separate libusb reader on the real pad. The announce, the input layout, the share bit, the rear buttons and the metadata below come from that reader. Its logs are not in this repository.
+- `tools/gip_probe.c` runs with `--vid 0x0e6f --pid 0x0338` (`captures/2026-10-22-pdp-probe-run*.txt`) verified the endpoints, the claim, and the start packets. Nobody touched the pad during these runs, so they contain no input reports.
+
+## Announce
+
+Announce, 32 bytes. The real device address (bytes 4..9) is replaced with `01 02 03 04 05 06`:
+
+```text
+02 20 79 1c 01 02 03 04 05 06 00 00 6f 0e 38 03 02 00 00 00 03 00 00 00 02 00 01 00 01 00 01 00
+```
+
+The layout is the same as on the PowerA pad. Vendor `0x0e6f`, product `0x0338`, firmware 2.0.3.0, hardware 2.1.1.1.
+
+## Start sequence
+
+PDP pads send no input reports after power-on alone. SDL and xpad send two more packets to vendor `0x0e6f` (xpad names them `xboxone_pdp_led_on` and `xboxone_pdp_auth`). Send all three in this order:
+
+1. Power-on: `05 20 <seq> 01 00`.
+2. Guide LED on: `0a 20 <seq> 03 00 01 14`. This is the same packet as the PowerA LED packet above.
+3. Security passed: `06 20 <seq> 02 01 00`.
+
+After step 3 the pad sends input reports (`0x20`). These are the only packets the PDP code paths write to the pad. The PowerA rumble trick is not used for PDP pads.
+
+Probe run 2 (`captures/2026-10-22-pdp-probe-run2.txt`) sent the three packets. The pad answered the LED packet within 3 ms with a status packet that has byte 5 set to `0x01`:
+
+```text
+03 20 02 04 80 01 00 00
+```
+
+Probe run 1 used an earlier probe build that also sent the PowerA rumble begin and end packets when no input arrived. The pad accepted them with no error.
+
+## Input report
+
+```text
+20 00 <seq> 2e ...   50 bytes, payload 0x2e = 46
+```
+
+| Offset | Meaning |
+|---|---|
+| 4..5 | buttons, the same bits as the PowerA table above |
+| 6..7 | left trigger, u16, 0..1023 |
+| 8..9 | right trigger, u16, 0..1023 |
+| 10..17 | left X, left Y, right X, right Y, s16 |
+| 32 (len - 18) | bit 0: share button |
+
+SDL and xpad both read the share button at byte `len - 18` for reports of 50 bytes or more. The gip core does the same. For shorter reports the position changes with the firmware, so the core does not decode share there.
+
+The two rear buttons have no bits of their own. The pad copies them in hardware to d-pad up and B.
+
+## Other packets
+
+- Keep-alive: `03 20 <seq> 04 80 00 00 00`. This is the status packet. The pad sends it with no host request. Ignore it, the same as on the PowerA pad.
+- Metadata (`0x04`): the pad sends it in chunks, 289 bytes in total. The preferred types are "Windows.Xbox.Input.Gamepad" and "Victrix.Xbox.Gamepad.Gambit". The gip core does not parse it.
+
+## Observations from the probe runs
+
+- When the probe claimed the interface, the pad was already in configuration 1 and sent status packets, not announce packets.
+- With nobody touching the pad, no input report arrived after the start packets. The pad sends input on change only, the same as the PowerA pad.
+- Not yet verified with `gip_probe`: the input table above (press every control during a 60 s run), and whether the guide LED lights after the LED packet.

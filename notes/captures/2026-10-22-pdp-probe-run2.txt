@@ -1,0 +1,16 @@
+   0.002 opened 0e6f:0338, current configuration=1
+   0.002 GIP interface: configuration 1, interface 0, setting 0, IN 0x81, OUT 0x01
+   0.002 claim_interface(0): ok
+   0.002 --- listening 2 s for unprompted traffic
+   0.005 IN    8: 03 20 01 04 80 00 00 00
+         STATUS (cmd 0x03)
+   2.010 --- send power-on (05 20 seq 01 00)
+   2.010 OUT   5: 05 20 00 01 00
+   2.014 --- send guide LED on (0a 20 seq 03 00 01 14)
+   2.014 OUT   7: 0a 20 01 03 00 01 14
+   2.017 IN    8: 03 20 02 04 80 01 00 00
+         STATUS (cmd 0x03)
+   2.018 --- send security passed (06 20 seq 02 01 00)
+   2.018 OUT   6: 06 20 02 02 01 00
+   4.025 --- got_announce=0 got_input=0; decoding until t=5 s. Press buttons now.
+   5.239 done. got_announce=0 got_input=0

@@ -28,7 +28,7 @@ targets:
         CFBundleShortVersionString: "0.1"
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSMinimumSystemVersion: "15.0"
-        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."
+        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft, PowerA or PDP."
         LSApplicationCategoryType: public.app-category.utilities
     entitlements:
       path: app/macgip.entitlements
@@ -62,7 +62,7 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         OSBundleUsageDescription: "Driver for wired GIP gamepads compatible with Xbox controllers that macOS does not support."
         OSMinimumDriverKitVersion: "24.0"
-        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft or PowerA."
+        NSHumanReadableCopyright: "MIT licence. Not affiliated with Microsoft, PowerA or PDP."
         IOKitPersonalities:
           # Device level: select configuration 1. macOS leaves this vendor-class device unconfigured.
           macgipUSBDevice:
@@ -89,6 +89,29 @@ targets:
             # "idVendor + idProduct + bConfigurationValue + bInterfaceNumber" combination.
             idVendor: 8406
             idProduct: 8199
+            bConfigurationValue: 1
+            bInterfaceNumber: 0
+          # The same two personalities for the PDP Afterglow Wave, 0x0e6f:0x0338.
+          macgipUSBDevicePDP:
+            CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleIdentifierKernel: com.apple.kpi.iokit
+            IOClass: IOUserService
+            IOUserClass: MacgipUSBDevice
+            IOProviderClass: IOUSBHostDevice
+            IOUserServerName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            IOMatchCategory: $(PRODUCT_BUNDLE_IDENTIFIER)
+            idVendor: 3695
+            idProduct: 824
+            bDeviceClass: 255
+          macgipGamepadPDP:
+            CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+            CFBundleIdentifierKernel: com.apple.iokit.IOHIDFamily
+            IOClass: AppleUserHIDDevice
+            IOUserClass: MacgipGamepad
+            IOProviderClass: IOUSBHostInterface
+            IOUserServerName: $(PRODUCT_BUNDLE_IDENTIFIER)
+            idVendor: 3695
+            idProduct: 824
             bConfigurationValue: 1
             bInterfaceNumber: 0
     entitlements:
