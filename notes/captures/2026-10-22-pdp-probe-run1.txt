@@ -1,0 +1,27 @@
+   0.004 opened 0e6f:0338, current configuration=1
+   0.004 GIP interface: configuration 1, interface 0, setting 0, IN 0x81, OUT 0x01
+   0.004 claim_interface(0): ok
+   0.004 --- listening 2 s for unprompted traffic
+   0.008 IN    8: 03 20 fb 04 80 00 00 00
+         STATUS (cmd 0x03)
+   0.012 IN    8: 03 20 fc 04 80 00 00 00
+         STATUS (cmd 0x03)
+   0.096 IN    8: 03 20 fd 04 80 00 00 00
+         STATUS (cmd 0x03)
+   2.013 --- send power-on (05 20 seq 01 00)
+   2.013 OUT   5: 05 20 00 01 00
+   2.017 --- send guide LED on (0a 20 seq 03 00 01 14)
+   2.017 OUT   7: 0a 20 01 03 00 01 14
+   2.020 IN    8: 03 20 fe 04 80 01 00 00
+         STATUS (cmd 0x03)
+   2.021 --- send security passed (06 20 seq 02 01 00)
+   2.021 OUT   6: 06 20 02 02 01 00
+   2.044 IN    8: 03 20 ff 04 80 00 00 00
+         STATUS (cmd 0x03)
+   4.033 --- no input report yet, trying PowerA rumble begin/end
+   4.037 --- send PowerA rumble begin
+   4.037 OUT  13: 09 00 03 09 00 0f 00 00 1d 1d ff 00 00
+   4.341 --- send PowerA rumble end
+   4.341 OUT  13: 09 00 04 09 00 0f 00 00 00 00 00 00 00
+   6.347 --- got_announce=0 got_input=0; decoding until t=5 s. Press buttons now.
+   6.475 done. got_announce=0 got_input=0
